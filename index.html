@@ -1177,7 +1177,7 @@ const esc = s =>
 const idArg = id =>
   encodeURIComponent(
     String(id || "")
-  );
+  ).replace(/'/g,"%27");
 
 
 const findItem = encoded =>
