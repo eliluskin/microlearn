@@ -1336,7 +1336,35 @@ function setF(t) {
 
   renderFeed();
 }
+function trackVisibleCards() {
+  const cards = document.querySelectorAll(".card[data-id]");
 
+  const io = new IntersectionObserver(
+    entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting || entry.intersectionRatio < 0.6) return;
+
+        const el = entry.target;
+
+        if (el.dataset.viewTimer) return;
+
+        el.dataset.viewTimer = setTimeout(() => {
+          const id = decodeURIComponent(el.dataset.id || "");
+          const item = feed.find(x => String(x.id) === id);
+
+          if (item) {
+            markViewed(item);
+          }
+
+          io.unobserve(el);
+        }, 3500);
+      });
+    },
+    { threshold: [0.6] }
+  );
+
+  cards.forEach(card => io.observe(card));
+}
 
 function topicEmoji(topic) {
 
