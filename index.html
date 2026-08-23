@@ -86,7 +86,7 @@ function render(){
 async function fresh(){
   document.getElementById("feed").innerHTML='<div class="loading">Building your feed…<div class="loader"><i></i></div></div>';
   const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),55000);
+  const timeout=setTimeout(()=>controller.abort(),120000);
   try{
     const r=await fetch("/api/feed",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({profile:{topics:S.topic,sources:S.source,watch:S.watch,seenTitles:S.seen.slice(-100).map(x=>x.title)}}),signal:controller.signal});
     clearTimeout(timeout);
