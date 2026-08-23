@@ -1,78 +1,74 @@
 import OpenAI from "openai";
-
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const MODEL = process.env.OPENAI_MODEL || "gpt-5-mini";
-
-const QUERIES = [
-  'site:reuters.com (humanoid OR robotics OR "autonomous driving" OR AI) when:7d',
-  'site:en.globes.co.il (AI OR robotics OR Mobileye OR autonomy OR China OR India) when:14d',
-  'site:ynetnews.com (AI OR robotics OR autonomous OR technology) when:14d',
-  'site:techcrunch.com (AI OR robotics OR agents OR autonomous) when:7d',
-  '(humanoid robotics OR embodied AI OR autonomous driving OR ADAS OR AI agents) China India when:7d'
+const ai=new OpenAI({apiKey:process.env.OPENAI_API_KEY});const MODEL=process.env.OPENAI_MODEL||"gpt-5.6-luna";
+const Q=[
+['site:reuters.com (Israel OR Iran OR Gaza OR Lebanon OR "United States" OR Trump OR Middle East)','en-US','US','US:en'],
+['site:ynet.co.il (פוליטיקה OR ממשלה OR איראן OR ישראל OR ביטחון)','he','IL','IL:he'],
+['site:ynetnews.com (Israel OR Iran OR politics OR security OR economy)','en-US','US','US:en'],
+['site:globes.co.il (שוק ההון OR אנבידיה OR בינה מלאכותית OR השקעות OR פוליטיקה OR איראן)','he','IL','IL:he'],
+['site:en.globes.co.il (Nvidia OR AI OR investments OR Israel OR autonomous OR robotics)','en-US','US','US:en'],
+['site:reuters.com (Nvidia OR "S&P 500" OR silver OR uranium OR SpaceX OR earnings OR markets)','en-US','US','US:en'],
+['site:reuters.com (humanoid OR robotics OR "autonomous driving" OR ADAS OR "artificial intelligence")','en-US','US','US:en'],
+['site:techcrunch.com (AI OR robotics OR agents OR Nvidia OR SpaceX)','en-US','US','US:en'],
+['site:spacenews.com (SpaceX OR Starship OR launch OR satellite)','en-US','US','US:en'],
+['site:arstechnica.com (AI OR science OR space OR chips)','en-US','US','US:en'],
+['(uranium OR nuclear fuel OR enrichment OR Cameco OR Kazatomprom) markets','en-US','US','US:en'],
+['(silver price OR silver demand OR solar silver) markets','en-US','US','US:en'],
+['Nvidia earnings upcoming expectations AI capex','en-US','US','US:en'],
+['S&P 500 market outlook earnings Federal Reserve','en-US','US','US:en'],
+['Israel domestic politics coalition Knesset latest','en-US','US','US:en'],
+['Iran Israel US geopolitics latest analysis','en-US','US','US:en'],
+['important science breakthrough research latest','en-US','US','US:en'],
+['surprising technology business science story latest','en-US','US','US:en']
 ];
-
-function strip(s=""){return s.replace(/<!\[CDATA\[|\]\]>/g,"").replace(/<[^>]+>/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/\s+/g," ").trim()}
-function tag(block,name){const m=block.match(new RegExp(`<${name}[^>]*>([\\s\\S]*?)<\\/${name}>`,"i"));return m?strip(m[1]):""}
-function sourceFrom(title,url){const s=(title+" "+url).toLowerCase();if(s.includes("reuters"))return"Reuters";if(s.includes("globes"))return"Globes";if(s.includes("ynet"))return"Ynet";if(s.includes("techcrunch"))return"TechCrunch";return"Other"}
-async function rss(q){
- const u="https://news.google.com/rss/search?q="+encodeURIComponent(q)+"&hl=en-US&gl=US&ceid=US:en";
- const r=await fetch(u,{headers:{"User-Agent":"LearningOS/2.0"}});if(!r.ok)return[];
- const xml=await r.text();return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0,12).map((m,i)=>{
-   const b=m[1],title=tag(b,"title"),url=tag(b,"link"),published=tag(b,"pubDate"),description=tag(b,"description");
-   return {id:(title+"-"+i).slice(0,180),title,url,published,description,source:sourceFrom(title,url)}
- })
-}
-function dedupe(xs){const seen=new Set();return xs.filter(x=>{let k=x.title.toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,80);if(!k||seen.has(k))return false;seen.add(k);return true})}
-function affinity(x,p){
- let t=(x.title+" "+x.description).toLowerCase(),score=(p?.sources?.[x.source]||0);
- for(const [k,v] of Object.entries(p?.topics||{})) if(t.includes(k.toLowerCase().replace(" & "," ")))score+=v*.35;
- for(const [k,v] of Object.entries(p?.tags||{})) if(t.includes(k.toLowerCase()))score+=v*.25;
- return score;
-}
-function parseJSON(s){s=s.trim().replace(/^```json\s*/i,"").replace(/```$/,"").trim();return JSON.parse(s)}
-
+const strip=(s="")=>s.replace(/<!\[CDATA\[|\]\]>/g,"").replace(/<[^>]+>/g," ").replace(/&amp;/g,"&").replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&nbsp;/g," ").replace(/\s+/g," ").trim();
+const tag=(b,n)=>{let m=b.match(new RegExp(`<${n}[^>]*>([\\s\\S]*?)<\\/${n}>`,"i"));return m?strip(m[1]):""};
+const raw=(b,n)=>{let m=b.match(new RegExp(`<${n}[^>]*>([\\s\\S]*?)<\\/${n}>`,"i"));return m?m[1]:""};
+function source(t,u,s=""){let x=(t+" "+u+" "+s).toLowerCase();if(x.includes("reuters"))return"Reuters";if(x.includes("globes"))return"Globes";if(x.includes("ynet"))return"Ynet";if(x.includes("techcrunch"))return"TechCrunch";if(x.includes("spacenews"))return"SpaceNews";if(x.includes("ars technica"))return"Ars Technica";return s||"Other"}
+async function rss([q,hl,gl,ceid]){let u=`https://news.google.com/rss/search?q=${encodeURIComponent(q+" when:7d")}&hl=${encodeURIComponent(hl)}&gl=${gl}&ceid=${encodeURIComponent(ceid)}`;let r=await fetch(u,{headers:{"User-Agent":"LearningOS/3.0"}});if(!r.ok)return[];let xml=await r.text();return[...xml.matchAll(/<item>([\s\S]*?)<\/item>/gi)].slice(0,14).map(m=>{let b=m[1],title=tag(b,"title"),url=tag(b,"link"),published=tag(b,"pubDate"),desc=raw(b,"description"),s=tag(b,"source"),im=desc.match(/<img[^>]+src=["']([^"']+)["']/i);return{id:(title+"-"+s).slice(0,220),title,url,published,description:strip(desc),source:source(title,url,s),image:im?im[1]:""}})}
+const norm=s=>String(s).toLowerCase().normalize("NFKD").replace(/[^a-z0-9\u0590-\u05ff]+/g," ").trim();
+function dedupe(xs){let seen=[];return xs.filter(x=>{let k=norm(x.title);if(!k)return false;let d=seen.some(y=>{let a=new Set(k.split(" ")),b=new Set(y.split(" ")),n=[...a].filter(z=>b.has(z)).length;return n/Math.max(a.size,b.size)>.68});if(d)return false;seen.push(k);return true})}
+function score(x,p){let s=(x.title+" "+x.description).toLowerCase(),v=(p?.sources?.[x.source]||0);for(let[k,w]of Object.entries(p?.topics||{}))if(s.includes(k.toLowerCase().replace(" & "," ")))v+=w*.18;for(let[k,w]of Object.entries(p?.tags||{}))if(s.includes(k.toLowerCase()))v+=w*.15;for(let[k,w]of Object.entries(p?.entities||{}))if(s.includes(k.toLowerCase()))v+=w*.22;for(let w of(p?.watch||[]))if(s.includes(w.toLowerCase()))v+=3.5;return v}
+const parse=s=>JSON.parse(s.trim().replace(/^```json\s*/i,"").replace(/```$/,"").trim());
 export default async function handler(req,res){
- if(req.method!=="POST")return res.status(405).json({error:"POST only"});
- if(!process.env.OPENAI_API_KEY)return res.status(503).json({error:"OPENAI_API_KEY missing"});
+ if(req.method!=="POST")return res.status(405).json({error:"POST only"});if(!process.env.OPENAI_API_KEY)return res.status(503).json({error:"OPENAI_API_KEY missing"});
  try{
-   const profile=req.body?.profile||{};
-   const batches=await Promise.all(QUERIES.map(rss));
-   let candidates=dedupe(batches.flat()).sort((a,b)=>affinity(b,profile)-affinity(a,profile)).slice(0,28);
-   if(!candidates.length)return res.status(502).json({error:"No news candidates"});
-   const prompt=`You are the intelligence editor for one senior technology executive.
-Turn current news into a highly selective learning feed, not a news summary.
+  let p=req.body?.profile||{},b=await Promise.all(Q.map(rss)),c=dedupe(b.flat()).filter(x=>x.title&&x.url).sort((a,b)=>score(b,p)-score(a,p)).slice(0,75),seen=new Set(p.seenIds||[]);c=c.filter(x=>!seen.has(x.id));
+  let prompt=`You edit a personal intelligence feed whose goal is to replace hours of LinkedIn, Ynet, Globes and short-video scrolling with something more useful and more interesting.
 
-The user's learned preference model is:
-${JSON.stringify(profile)}
+USER MODEL:
+${JSON.stringify(p)}
 
-Candidate stories:
-${JSON.stringify(candidates)}
+CANDIDATES:
+${JSON.stringify(c)}
 
-Select exactly 6 stories with the highest combination of:
-1. direct relevance to humanoid robotics, actuation, embodied AI, ADAS/autonomy, China/India technology, AI agents, leadership, strategy, industrial policy;
-2. novelty and material importance;
-3. learning value;
-4. source quality and freshness;
-5. the user's preferences.
-Keep 1 exploratory story outside the strongest preferences when it has high intellectual value.
+Create a LONG feed of exactly 18 items. Diversity is mandatory:
+- 3-4 Investments/Markets items, prioritizing watch threads such as S&P 500, silver, uranium, Nvidia and SpaceX, plus earnings/catalysts when materially covered.
+- 3-4 Geopolitics items, especially Israel/Iran/US/Middle East when important.
+- 2 internal Israeli politics/economy/society items when meaningful.
+- 2-3 AI/technology items.
+- Maximum 2 robotics/autonomy items unless there is genuinely major news.
+- 1 science/intellectual surprise.
+- 1 deliberate new-territory item outside established preferences.
+No single company, country or theme may dominate. Strongly avoid material similar to seenTitles. If revisiting a story, explain exactly what changed.
 
-For each selected story return:
-id, type:"news", topic (one of Robotics, ADAS, AI, Strategy, India & China, Leadership, Geopolitics, Finance), source, published (ISO date if possible), title (clean title), url,
-what (2 concise sentences, factual),
-why (2 concise sentences explicitly explaining why THIS user should care),
-lesson (2-3 sentences extracting a reusable non-obvious concept),
-question (a difficult applied decision question),
-choices (3 plausible options),
-correct (0-based index),
-explain (1-2 concise sentences),
-tags (3-5 lowercase tags).
+This is not a school quiz app and not only an executive-summary app. A story may earn a place simply because it is important, surprising or fascinating.
 
-Do not invent facts beyond candidate metadata. If metadata is insufficient, frame the lesson around the reported development without adding specifics. Avoid generic management platitudes. Make the questions hard enough for an experienced executive.
+For every item return:
+id, topic (Investments, Markets, Geopolitics, Israel, Politics, AI, Robotics, ADAS, Science, Surprise), source, published, title, url, image,
+what: 2-3 factual sentences,
+why: why it deserves this user's attention,
+lesson: one non-obvious explanatory model or reusable insight,
+novelty: what is genuinely new/different,
+format: vary among prediction,counterpoint,ranking,thesis,reflection,
+prompt: a thought-provoking prompt requiring judgment, not trivia,
+options: 2-4 plausible options for prediction/counterpoint/ranking, otherwise [],
+reveal: a short useful response after a choice, never "correct/incorrect",
+tags: 3-6 precise lowercase tags,
+entities: key people, countries, companies, assets or technologies.
 
-Return ONLY valid JSON in this shape: {"items":[...]}`
-   const response=await client.responses.create({model:MODEL,input:prompt});
-   const parsed=parseJSON(response.output_text);
-   const valid=(parsed.items||[]).filter(x=>x.title&&x.url&&x.what&&x.why&&x.lesson).slice(0,6);
-   return res.status(200).json({items:valid,candidateCount:candidates.length,model:MODEL});
- }catch(e){console.error(e);return res.status(500).json({error:"feed_failed",detail:String(e?.message||e)})}
+Do not invent facts beyond candidate metadata. Keep factual claims narrow when metadata is thin. Avoid generic management language.
+Return ONLY valid JSON {"items":[...]}.`;
+  let r=await ai.responses.create({model:MODEL,input:prompt}),d=parse(r.output_text),items=(d.items||[]).filter(x=>x.title&&x.what&&x.why&&x.lesson).slice(0,18);
+  res.status(200).json({items,candidateCount:c.length,model:MODEL})
+ }catch(e){console.error(e);res.status(500).json({error:"feed_failed",detail:String(e?.message||e)})}
 }
