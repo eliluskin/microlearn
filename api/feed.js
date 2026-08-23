@@ -32,7 +32,18 @@ const parse=s=>JSON.parse(s.trim().replace(/^```json\s*/i,"").replace(/```$/,"")
 export default async function handler(req,res){
  if(req.method!=="POST")return res.status(405).json({error:"POST only"});if(!process.env.OPENAI_API_KEY)return res.status(503).json({error:"OPENAI_API_KEY missing"});
  try{
-  let p=req.body?.profile||{},b=await Promise.all(Q.map(rss)),c=dedupe(b.flat()).filter(x=>x.title&&x.url).sort((a,b)=>score(b,p)-score(a,p)).slice(0,75),seen=new Set(p.seenIds||[]);c=c.filter(x=>!seen.has(x.id));
+let p=req.body?.profile||{};
+let requestedBatch=Number(req.body?.batchSize);
+let batchSize=requestedBatch ? Math.max(18,Math.min(40,requestedBatch)) : 30;
+
+let b=await Promise.all(Q.map(rss));
+let c=dedupe(b.flat())
+  .filter(x=>x.title&&x.url)
+  .sort((a,b)=>score(b,p)-score(a,p))
+  .slice(0,75);
+
+let seen=new Set(p.seenIds||[]);
+c=c.filter(x=>!seen.has(x.id));
   let prompt=`You edit a personal intelligence feed whose goal is to replace hours of LinkedIn, Ynet, Globes and short-video scrolling with something more useful and more interesting.
 
 USER MODEL:
@@ -41,14 +52,14 @@ ${JSON.stringify(p)}
 CANDIDATES:
 ${JSON.stringify(c)}
 
-Create a LONG feed of exactly 18 items. Diversity is mandatory:
-- 3-4 Investments/Markets items, prioritizing watch threads such as S&P 500, silver, uranium, Nvidia and SpaceX, plus earnings/catalysts when materially covered.
-- 3-4 Geopolitics items, especially Israel/Iran/US/Middle East when important.
-- 2 internal Israeli politics/economy/society items when meaningful.
-- 2-3 AI/technology items.
-- Maximum 2 robotics/autonomy items unless there is genuinely major news.
-- 1 science/intellectual surprise.
-- 1 deliberate new-territory item outside established preferences.
+Create a feed of exactly ${batchSize} items. Diversity is mandatory:
+- 5-6 Investments/Markets items, prioritizing watch threads such as S&P 500, silver, uranium, Nvidia and SpaceX, plus earnings/catalysts when materially covered.
+- 5-6 Geopolitics items, especially Israel/Iran/US/Middle East when important.
+- 3-4 internal Israeli politics/economy/society items when meaningful.
+- 4-5 AI/technology items.
+- Maximum 3 robotics/autonomy items unless there is genuinely major news.
+- 2-3 science/intellectual surprise items.
+- 2 deliberate new-territory items outside established preferences.
 No single company, country or theme may dominate. Strongly avoid material similar to seenTitles. If revisiting a story, explain exactly what changed.
 
 This is not a school quiz app and not only an executive-summary app. A story may earn a place simply because it is important, surprising or fascinating.
@@ -68,7 +79,7 @@ entities: key people, countries, companies, assets or technologies.
 
 Do not invent facts beyond candidate metadata. Keep factual claims narrow when metadata is thin. Avoid generic management language.
 Return ONLY valid JSON {"items":[...]}.`;
-  let r=await ai.responses.create({model:MODEL,input:prompt}),d=parse(r.output_text),items=(d.items||[]).filter(x=>x.title&&x.what&&x.why&&x.lesson).slice(0,18);
+  let r=await ai.responses.create({model:MODEL,input:prompt}),d=parse(r.output_text),items=(d.items||[]).filter(x=>x.title&&x.what&&x.why&&x.lesson).slice(0,batchSize);
   res.status(200).json({items,candidateCount:c.length,model:MODEL})
  }catch(e){console.error(e);res.status(500).json({error:"feed_failed",detail:String(e?.message||e)})}
 }
