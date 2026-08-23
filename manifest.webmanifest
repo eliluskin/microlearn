@@ -1,12 +1,12 @@
 {
-  "name": "Daily MicroLearn",
-  "short_name": "MicroLearn",
+  "name": "Elie Learning OS",
+  "short_name": "LearningOS",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#07101c",
-  "theme_color": "#07101c",
-  "description": "Daily bite-sized learning instead of scrolling.",
+  "background_color": "#090B10",
+  "theme_color": "#090B10",
+  "description": "A personalized decision and micro-learning system for robotics, autonomy, strategy and leadership.",
   "icons": [
     {
       "src": "icon-192.png",
