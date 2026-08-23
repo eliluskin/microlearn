@@ -1552,8 +1552,7 @@ function card(x) {
       }
 
       ${opts}
-
-      <div class="actions">
+            <div class="actions">
 
         <button
           class="act ${
@@ -1572,4 +1571,1121 @@ function card(x) {
               ? "down"
               : ""
           }"
-          onclick="feedback('${eid}
+          onclick="feedback('${eid}',-1)"
+        >
+          👎
+        </button>
+
+        <button
+          class="act"
+          onclick="toggleSave('${eid}')"
+        >
+          ${saved ? "★" : "☆"}
+        </button>
+
+        <button
+          class="act"
+          onclick="openAI('${eid}')"
+        >
+          Deep dive
+        </button>
+
+        ${
+          x.url
+
+            ? `<a
+                class="article"
+                href="${esc(x.url)}"
+                target="_blank"
+                rel="noopener"
+                onclick="opened('${eid}')"
+              >
+                Read article ↗
+              </a>`
+
+            : ""
+        }
+
+      </div>
+
+    </div>
+
+  </article>
+  `;
+}
+
+
+function renderFeed() {
+
+  const shown =
+    filter === "All"
+
+      ? feed
+
+      : feed.filter(
+          x =>
+            x.topic === filter
+        );
+
+  document.getElementById(
+    "feed"
+  ).innerHTML =
+
+    shown.length
+
+      ? shown
+          .map(card)
+          .join("")
+
+      : `<div class="empty">
+          No stories in this filter yet.
+        </div>`;
+}
+
+
+function renderSaved() {
+
+  document.getElementById(
+    "savedFeed"
+  ).innerHTML =
+
+    S.saved.length
+
+      ? S.saved
+          .map(card)
+          .join("")
+
+      : `<div class="empty">
+          Save stories you want to keep.
+        </div>`;
+}
+
+
+function renderModel() {
+
+  const vals =
+    Object.entries(
+      S.topic
+    )
+    .sort(
+      (a,b) =>
+        b[1] -
+        a[1]
+    );
+
+  const max =
+    Math.max(
+      1,
+      ...vals.map(
+        x =>
+          Math.abs(
+            Number(x[1]) ||
+            0
+          )
+      )
+    );
+
+  document.getElementById(
+    "weights"
+  ).innerHTML =
+
+    vals.map(
+      ([k,v]) =>
+
+        `<div class="weight">
+
+          <span>
+            ${esc(k)}
+          </span>
+
+          <div class="bar">
+
+            <i
+              style="width:${
+                Math.max(
+                  4,
+                  Math.min(
+                    100,
+                    Math.abs(
+                      Number(v) || 0
+                    ) /
+                    max *
+                    100
+                  )
+                )
+              }%"
+            ></i>
+
+          </div>
+
+          <b>
+            ${Number(v).toFixed(1)}
+          </b>
+
+        </div>`
+    )
+    .join("");
+
+  document.getElementById(
+    "watch"
+  ).innerHTML =
+
+    S.watch.map(
+      (w,i) =>
+
+        `<span class="wchip">
+
+          ${esc(w)}
+
+          <button
+            onclick="rmWatch(${i})"
+          >
+            ×
+          </button>
+
+        </span>`
+    )
+    .join("");
+}
+
+
+function remember(items) {
+
+  const map =
+    new Map(
+      S.seen.map(
+        x => [
+          String(x.id),
+          x
+        ]
+      )
+    );
+
+  for (
+    const x of items
+  ) {
+
+    map.set(
+      String(x.id),
+      {
+        id:x.id,
+        title:x.title,
+        time:Date.now()
+      }
+    );
+  }
+
+  S.seen =
+    [...map.values()]
+      .slice(-220);
+
+  save();
+}
+
+
+function cache() {
+
+  S.cache = {
+    time:Date.now(),
+    items:
+      feed.slice(0,80)
+  };
+
+  save();
+}
+
+
+function mergeUnique(items) {
+
+  const existing =
+    new Set(
+      feed.map(
+        x =>
+          String(x.id)
+      )
+    );
+
+  return items.filter(
+    x =>
+      x?.id &&
+      !existing.has(
+        String(x.id)
+      )
+  );
+}
+
+
+async function requestBatch() {
+
+  const controller =
+    new AbortController();
+
+  const timeout =
+    setTimeout(
+      () =>
+        controller.abort(),
+      120000
+    );
+
+  try {
+
+    const r =
+      await fetch(
+        "/api/feed",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              batchSize:10,
+              profile:profile()
+            }),
+
+          signal:
+            controller.signal
+        }
+      );
+
+    if (!r.ok) {
+      throw new Error(
+        `HTTP ${r.status}`
+      );
+    }
+
+    const d =
+      await r.json();
+
+    if (
+      !Array.isArray(
+        d.items
+      )
+    ) {
+      throw new Error(
+        "Invalid feed response"
+      );
+    }
+
+    return d;
+
+  } finally {
+
+    clearTimeout(
+      timeout
+    );
+  }
+}
+
+
+async function initialLoad() {
+
+  if (loading) {
+    return;
+  }
+
+  loading = true;
+  exhausted = false;
+
+  if (!feed.length) {
+
+    document.getElementById(
+      "feed"
+    ).innerHTML =
+
+      `<div class="loading">
+
+        Building your feed…
+
+        <div class="loader">
+          <i></i>
+        </div>
+
+      </div>`;
+  }
+
+  setStatus(
+    feed.length
+      ? "CACHED"
+      : "LOADING",
+    false
+  );
+
+  document.getElementById(
+    "meta"
+  ).textContent =
+
+    feed.length
+
+      ? "checking quietly for updates"
+
+      : "building a fresh batch";
+
+  try {
+
+    const d =
+      await requestBatch();
+
+    const fresh =
+      mergeUnique(
+        d.items
+      );
+
+    if (
+      fresh.length
+    ) {
+
+      feed =
+        uniqItems([
+          ...fresh,
+          ...feed
+        ]);
+
+      remember(
+        fresh
+      );
+
+      cache();
+
+      renderFeed();
+
+      setStatus(
+        "LIVE",
+        true
+      );
+
+      document.getElementById(
+        "meta"
+      ).textContent =
+        `${
+          d.candidateCount ||
+          "many"
+        } candidates · ${
+          fresh.length
+        } new on top`;
+
+    } else {
+
+      setStatus(
+        feed.length
+          ? "CACHED"
+          : "LIVE",
+        !!feed.length
+      );
+
+      document.getElementById(
+        "meta"
+      ).textContent =
+
+        feed.length
+
+          ? "no materially new stories yet"
+
+          : "no stories available";
+
+      if (!feed.length) {
+        renderFeed();
+      }
+    }
+
+  } catch (e) {
+
+    console.error(e);
+
+    setStatus(
+      feed.length
+        ? "CACHED"
+        : "ERROR",
+      false
+    );
+
+    document.getElementById(
+      "meta"
+    ).textContent =
+
+      feed.length
+
+        ? "using last good feed"
+
+        : "feed could not load";
+
+    if (!feed.length) {
+
+      document.getElementById(
+        "feed"
+      ).innerHTML =
+
+        `<div class="empty">
+
+          Feed failed to load.
+
+          <br>
+
+          <button
+            class="retry"
+            onclick="initialLoad()"
+          >
+            Try again
+          </button>
+
+        </div>`;
+    }
+
+  } finally {
+
+    loading = false;
+  }
+}
+  async function loadMore() {
+
+  if (
+    loading ||
+    exhausted ||
+    filter !== "All"
+  ) {
+    return;
+  }
+
+  loading = true;
+
+  document.getElementById(
+    "moreState"
+  ).innerHTML =
+
+    `Finding more worthwhile stories…
+
+     <div class="loader">
+       <i></i>
+     </div>`;
+
+  try {
+
+    const d =
+      await requestBatch();
+
+    const more =
+      mergeUnique(
+        d.items
+      );
+
+    if (
+      more.length
+    ) {
+
+      feed =
+        uniqItems([
+          ...feed,
+          ...more
+        ]);
+
+      remember(
+        more
+      );
+
+      cache();
+
+      renderFeed();
+
+      document.getElementById(
+        "meta"
+      ).textContent =
+        `${feed.length} stories in this session`;
+
+      document.getElementById(
+        "moreState"
+      ).textContent = "";
+
+      setStatus(
+        "LIVE",
+        true
+      );
+
+    } else {
+
+      exhausted = true;
+
+      document.getElementById(
+        "moreState"
+      ).textContent =
+        "You're caught up on the current source pool.";
+    }
+
+  } catch (e) {
+
+    console.error(e);
+
+    document.getElementById(
+      "moreState"
+    ).innerHTML =
+
+      `<button
+        class="retry"
+        onclick="loadMore()"
+      >
+        Load more
+      </button>`;
+  }
+
+  finally {
+
+    loading = false;
+  }
+}
+
+
+function bootObserver() {
+
+  if (observer) {
+    observer.disconnect();
+  }
+
+  observer =
+    new IntersectionObserver(
+      entries => {
+
+        if (
+          entries.some(
+            e =>
+              e.isIntersecting
+          )
+        ) {
+          loadMore();
+        }
+      },
+      {
+        rootMargin:
+          "1100px 0px"
+      }
+    );
+
+  observer.observe(
+    document.getElementById(
+      "sentinel"
+    )
+  );
+}
+
+
+function adjustMap(
+  map,
+  key,
+  delta
+) {
+
+  if (!key) {
+    return;
+  }
+
+  map[key] =
+    Math.max(
+      -5,
+      Math.min(
+        12,
+        Number(
+          map[key] || 0
+        ) +
+        delta
+      )
+    );
+}
+
+  function feedback(
+  encoded,
+  val
+) {
+
+  const x =
+    findItem(encoded);
+
+  if (!x) {
+    return;
+  }
+
+  S.feedback[
+    String(x.id)
+  ] = val;
+
+  adjustMap(
+    S.topic,
+    x.topic,
+    val * .5
+  );
+
+  adjustMap(
+    S.source,
+    x.source,
+    val * .25
+  );
+
+  for (
+    const t of x.tags || []
+  ) {
+
+    adjustMap(
+      S.tags,
+      t,
+      val * .12
+    );
+  }
+
+  for (
+    const e of x.entities || []
+  ) {
+
+    adjustMap(
+      S.entity,
+      e,
+      val * .16
+    );
+  }
+
+  S.signals.push({
+    id:x.id,
+    type:
+      val > 0
+        ? "like"
+        : "dislike",
+    time:Date.now()
+  });
+
+  S.signals =
+    S.signals.slice(-300);
+
+  save();
+
+  renderFeed();
+
+  renderSaved();
+
+  toast(
+    val > 0
+      ? "More like this"
+      : "Less like this"
+  );
+}
+
+
+function toggleSave(
+  encoded
+) {
+
+  const x =
+    findItem(encoded);
+
+  if (!x) {
+    return;
+  }
+
+  const i =
+    S.saved.findIndex(
+      s =>
+        String(s.id) ===
+        String(x.id)
+    );
+
+  if (
+    i >= 0
+  ) {
+
+    S.saved.splice(
+      i,
+      1
+    );
+
+    toast(
+      "Removed from saved"
+    );
+
+  } else {
+
+    S.saved.unshift(
+      x
+    );
+
+    S.saved =
+      S.saved.slice(
+        0,
+        100
+      );
+
+    toast(
+      "Saved"
+    );
+  }
+
+  save();
+
+  renderFeed();
+
+  renderSaved();
+}
+
+
+function choose(
+  encoded,
+  i
+) {
+
+  const x =
+    findItem(encoded);
+
+  if (!x) {
+    return;
+  }
+
+  S.choices[
+    String(x.id)
+  ] = i;
+
+  for (
+    const t of x.tags || []
+  ) {
+
+    adjustMap(
+      S.tags,
+      t,
+      .05
+    );
+  }
+
+  S.signals.push({
+    id:x.id,
+    type:"choice",
+    value:i,
+    time:Date.now()
+  });
+
+  S.signals =
+    S.signals.slice(-300);
+
+  save();
+
+  renderFeed();
+}
+
+
+function opened(encoded) {
+
+  const x =
+    findItem(encoded);
+
+  if (!x) {
+    return;
+  }
+
+  adjustMap(
+    S.topic,
+    x.topic,
+    .08
+  );
+
+  adjustMap(
+    S.source,
+    x.source,
+    .05
+  );
+
+  S.signals.push({
+    id:x.id,
+    type:"open",
+    time:Date.now()
+  });
+
+  S.signals =
+    S.signals.slice(-300);
+
+  save();
+}
+
+
+function go(v) {
+
+  document.querySelectorAll(
+    ".view"
+  ).forEach(
+    x =>
+      x.classList.remove(
+        "on"
+      )
+  );
+
+  document.getElementById(
+    v
+  ).classList.add(
+    "on"
+  );
+
+  document.querySelectorAll(
+    ".nav"
+  ).forEach(
+    x =>
+      x.classList.toggle(
+        "on",
+        x.dataset.v === v
+      )
+  );
+
+  if (
+    v === "saved"
+  ) {
+    renderSaved();
+  }
+
+  if (
+    v === "model"
+  ) {
+    renderModel();
+  }
+}
+
+
+function addWatch() {
+
+  const input =
+    document.getElementById(
+      "watchInput"
+    );
+
+  const v =
+    input.value.trim();
+
+  if (!v) {
+    return;
+  }
+
+  if (
+    !S.watch.some(
+      x =>
+        x.toLowerCase() ===
+        v.toLowerCase()
+    )
+  ) {
+
+    S.watch.push(
+      v
+    );
+  }
+
+  input.value = "";
+
+  save();
+
+  renderModel();
+
+  toast(
+    "Added to watch threads"
+  );
+}
+
+
+function rmWatch(i) {
+
+  S.watch.splice(
+    i,
+    1
+  );
+
+  save();
+
+  renderModel();
+}
+
+
+function openAI(encoded) {
+
+  active =
+    findItem(encoded);
+
+  if (!active) {
+    return;
+  }
+
+  document.getElementById(
+    "sheetTitle"
+  ).textContent =
+    active.title;
+
+  document.getElementById(
+    "sheetBody"
+  ).textContent =
+    "Choose an angle below, or start with Go deeper.";
+
+  document.getElementById(
+    "sheetWrap"
+  ).classList.add(
+    "on"
+  );
+}
+
+
+function closeSheet() {
+
+  document.getElementById(
+    "sheetWrap"
+  ).classList.remove(
+    "on"
+  );
+}
+
+
+async function askAI(mode) {
+
+  if (!active) {
+    return;
+  }
+
+  document.getElementById(
+    "sheetBody"
+  ).textContent =
+    "Thinking…";
+
+  const controller =
+    new AbortController();
+
+  const timeout =
+    setTimeout(
+      () =>
+        controller.abort(),
+      90000
+    );
+
+  try {
+
+    const r =
+      await fetch(
+        "/api/deepen",
+        {
+          method:"POST",
+
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+              item:active,
+              mode,
+              profile:profile()
+            }),
+
+          signal:
+            controller.signal
+        }
+      );
+
+    if (!r.ok) {
+
+      throw new Error(
+        `HTTP ${r.status}`
+      );
+    }
+
+    const d =
+      await r.json();
+
+    document.getElementById(
+      "sheetBody"
+    ).textContent =
+      d.answer ||
+      "No analysis returned.";
+
+  } catch (e) {
+
+    console.error(e);
+
+    document.getElementById(
+      "sheetBody"
+    ).textContent =
+      "The deep dive could not load. Try again.";
+
+  } finally {
+
+    clearTimeout(
+      timeout
+    );
+  }
+}
+
+
+async function boot() {
+
+  filters();
+
+  renderSaved();
+
+  renderModel();
+
+  if (
+    S.cache?.items?.length
+  ) {
+
+    feed =
+      uniqItems(
+        S.cache.items
+      );
+
+    remember(
+      feed
+    );
+
+    renderFeed();
+
+    setStatus(
+      "CACHED",
+      false
+    );
+
+    document.getElementById(
+      "meta"
+    ).textContent =
+      "checking quietly for updates";
+  }
+
+  bootObserver();
+
+  await initialLoad();
+}
+
+
+boot();
+
+
+if (
+  "serviceWorker" in navigator
+) {
+
+  window.addEventListener(
+    "load",
+    async () => {
+
+      try {
+
+        const reg =
+          await navigator.serviceWorker.register(
+            "/sw.js?v=6",
+            {
+              updateViaCache:
+                "none"
+            }
+          );
+
+        await reg.update();
+
+      } catch (e) {
+
+        console.warn(e);
+      }
+    }
+  );
+}
+
+</script>
+
+</body>
+
+</html>
+  
