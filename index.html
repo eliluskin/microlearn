@@ -1,302 +1,125 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Elie Learning OS</title>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#090B10">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LearningOS AI</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#080A0F">
 <meta name="mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <style>
-:root{
- --bg:#090B10; --bg2:#0D1017; --panel:#11151D; --panel2:#171C26;
- --text:#F5F6F8; --muted:#8F98A8; --line:rgba(255,255,255,.075);
- --lime:#C8FF62; --cyan:#78E7FF; --violet:#A58AFF; --orange:#FFB45C; --red:#FF6D78;
- --safe:env(safe-area-inset-bottom);
-}
-*{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-body{min-height:100vh;background:
- radial-gradient(750px 420px at 105% -5%,rgba(165,138,255,.13),transparent 60%),
- radial-gradient(600px 400px at -10% 15%,rgba(120,231,255,.07),transparent 65%),var(--bg)}
-button{font:inherit}
-.app{max-width:760px;margin:auto;min-height:100vh;padding:16px 14px calc(96px + var(--safe))}
-.header{display:flex;align-items:center;justify-content:space-between;margin:2px 2px 14px}
-.logo{font-weight:900;font-size:20px;letter-spacing:-.04em}.logo i{font-style:normal;color:var(--lime)}
-.avatar{width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,#262B38,#171A22);border:1px solid var(--line);display:grid;place-items:center;font-weight:850;font-size:12px}
-.hero{padding:23px 21px;border:1px solid var(--line);border-radius:26px;background:linear-gradient(145deg,rgba(200,255,98,.08),rgba(165,138,255,.04) 48%,rgba(255,255,255,.018));overflow:hidden;position:relative}
-.hero:after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-70px;top:-85px;background:rgba(200,255,98,.07);filter:blur(2px)}
-.overline{color:var(--lime);text-transform:uppercase;letter-spacing:.15em;font-size:10px;font-weight:850}
-.hero h1{font-size:31px;line-height:1.02;letter-spacing:-.045em;margin:9px 0 11px;max-width:560px}
-.hero p{color:#B7BFCC;font-size:14px;line-height:1.5;margin:0;max-width:570px}
-.heroStats{display:flex;gap:8px;margin-top:18px;flex-wrap:wrap}
-.chip{padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid var(--line);font-size:11px;color:#B4BDCB}
-.chip b{color:#fff}
-.sectionHead{display:flex;align-items:end;justify-content:space-between;margin:22px 2px 10px}
-.sectionHead h2{font-size:18px;letter-spacing:-.03em;margin:0}.sectionHead span{font-size:11px;color:var(--muted)}
-.focusGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
-.focus{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:15px;min-height:108px}
-.focus .ico{font-size:18px;color:var(--cyan)}.focus b{display:block;font-size:14px;margin-top:11px}.focus small{color:var(--muted);font-size:11px;line-height:1.35;display:block;margin-top:4px}
-.startBtn{width:100%;margin-top:12px;padding:16px;border:0;border-radius:17px;background:var(--lime);color:#0A0D0C;font-weight:900;letter-spacing:-.01em}
-.startBtn:active{transform:scale(.99)}
-.radar{display:grid;gap:8px}
-.radarItem{display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);padding:13px;border-radius:17px}
-.radarNum{width:35px;height:35px;border-radius:12px;display:grid;place-items:center;background:rgba(120,231,255,.08);color:var(--cyan);font-weight:850;font-size:12px;flex:0 0 auto}
-.radarItem b{font-size:13px;display:block}.radarItem small{font-size:11px;color:var(--muted);display:block;margin-top:3px;line-height:1.35}
-.bottom{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);display:grid;grid-template-columns:repeat(4,1fr);padding:9px 12px calc(9px + var(--safe));background:rgba(9,11,16,.88);backdrop-filter:blur(18px);border-top:1px solid var(--line);z-index:30}
-.nav{border:0;background:none;color:#687283;padding:7px 3px;font-size:10px}.nav .nicon{font-size:19px;display:block;margin-bottom:2px}.nav.on{color:var(--text)}.nav.on .nicon{color:var(--lime)}
-.view{display:none}.view.on{display:block}
-.feedTop{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 12px}.back{background:none;border:0;color:var(--muted);font-size:13px}.progressTxt{font-size:11px;color:var(--muted)}
-.progress{height:4px;background:#161A22;border-radius:999px;overflow:hidden;margin-bottom:12px}.progress>div{height:100%;background:linear-gradient(90deg,var(--lime),var(--cyan));width:0;transition:.25s}
-.card{min-height:70vh;background:linear-gradient(155deg,rgba(255,255,255,.028),transparent 45%),var(--panel);border:1px solid var(--line);border-radius:28px;padding:23px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 30px 80px rgba(0,0,0,.26)}
-.card .topic{font-size:10px;text-transform:uppercase;letter-spacing:.16em;font-weight:900;color:var(--cyan)}
-.card .level{float:right;color:var(--muted);font-weight:600;letter-spacing:0;text-transform:none}
-.card h2{font-size:31px;letter-spacing:-.045em;line-height:1.04;margin:10px 0 16px}
-.card .body{font-size:17px;line-height:1.58;color:#D9DEE7}
-.insight{margin-top:18px;padding:15px 16px;border-radius:17px;background:rgba(200,255,98,.055);border:1px solid rgba(200,255,98,.13);font-size:14px;line-height:1.45}
-.prompt{margin-top:10px;padding:14px 16px;border-radius:17px;background:var(--panel2);font-size:13px;line-height:1.45;color:#C1C8D4}
-.memory{font-size:11px;color:var(--muted);margin-top:14px}.memory b{color:var(--violet)}
-.controls{display:flex;gap:9px;margin-top:24px}.primary,.ghost{border:0;border-radius:16px;padding:14px 15px;font-weight:850}.primary{background:var(--lime);color:#0A0D0C;flex:1}.ghost{background:#1A1F29;color:#A9B1BF;border:1px solid var(--line)}
-.choices{display:grid;gap:9px;margin-top:20px}.choice{padding:15px;border-radius:16px;border:1px solid var(--line);background:#171B24;color:#E4E8EF;text-align:left;font-size:14px;line-height:1.4}.choice.correct{border-color:rgba(200,255,98,.7);background:rgba(200,255,98,.08)}.choice.wrong{border-color:rgba(255,109,120,.6);background:rgba(255,109,120,.07)}
-.feedback{min-height:42px;color:#AEB6C3;font-size:13px;line-height:1.45;margin-top:12px}
-.cardActions{display:flex;justify-content:space-between;align-items:center;padding:10px 4px 0}.save{background:none;border:0;color:var(--muted);font-size:12px}.save.on{color:var(--lime)}
-.done{text-align:center;justify-content:center;align-items:center}.scoreRing{width:100px;height:100px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--lime) var(--pct),#1A1E27 0);margin:10px auto 18px}.scoreRing:after{content:attr(data-score);width:78px;height:78px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-weight:900;font-size:22px}
-.topicList{display:grid;gap:9px}.topicRow{display:grid;grid-template-columns:46px 1fr auto;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px}.topicIco{width:42px;height:42px;border-radius:14px;background:#181D27;display:grid;place-items:center;color:var(--cyan);font-size:20px}.topicRow b{font-size:14px}.topicRow small{display:block;color:var(--muted);font-size:11px;margin-top:3px}.mastery{font-size:11px;color:var(--lime);font-weight:800}
-.libraryTabs{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.libTab{border:1px solid var(--line);background:#121720;color:var(--muted);padding:8px 10px;border-radius:12px;font-size:11px;white-space:nowrap}.libTab.on{color:#0B0E0A;background:var(--lime);border-color:var(--lime)}
-.savedList{display:grid;gap:8px}.savedCard{border:1px solid var(--line);background:var(--panel);padding:14px;border-radius:17px}.savedCard .st{color:var(--cyan);font-size:10px;text-transform:uppercase;letter-spacing:.12em}.savedCard b{display:block;font-size:14px;margin-top:6px}.savedCard p{color:var(--muted);font-size:12px;line-height:1.4;margin:6px 0 0}
-.profileBox{background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:19px;margin-bottom:10px}.profileBox h3{font-size:16px;margin:0 0 8px}.metricGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.metric{background:#171C25;border-radius:15px;padding:13px;text-align:center}.metric b{font-size:20px;display:block}.metric small{font-size:10px;color:var(--muted)}
-.toggleRow{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid var(--line)}.toggleRow:first-of-type{border-top:0}.toggleRow span{font-size:13px}.toggle{width:42px;height:24px;border-radius:999px;background:#242A35;padding:3px}.toggle i{display:block;width:18px;height:18px;border-radius:50%;background:#727C8D;transition:.2s}.toggle.on{background:rgba(200,255,98,.25)}.toggle.on i{transform:translateX(18px);background:var(--lime)}
-.install{display:none;margin-top:10px;width:100%;padding:13px;border-radius:15px;background:#1A202A;border:1px solid var(--line);color:#fff}
-.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#EDEFF3;color:#11151A;padding:10px 14px;border-radius:12px;font-size:12px;font-weight:750;opacity:0;pointer-events:none;transition:.2s;z-index:50}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(max-width:430px){.hero h1{font-size:29px}.card h2{font-size:29px}.card{min-height:68vh}.focusGrid{grid-template-columns:1fr 1fr}}
-</style>
-</head>
+:root{--bg:#080A0F;--p:#10141C;--p2:#161B25;--text:#F5F7FA;--muted:#8F99A9;--line:rgba(255,255,255,.08);--lime:#C8FF62;--cyan:#6DE4FF;--violet:#AB90FF;--red:#FF7380;--safe:env(safe-area-inset-bottom)}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}body{min-height:100vh;background:radial-gradient(700px 380px at 105% -5%,rgba(171,144,255,.12),transparent 58%),radial-gradient(500px 350px at -5% 20%,rgba(109,228,255,.06),transparent 60%),var(--bg)}
+button{font:inherit}.app{max-width:760px;margin:auto;padding:14px 13px calc(92px + var(--safe))}
+.header{display:flex;justify-content:space-between;align-items:center;margin:3px 2px 14px}.logo{font-size:21px;font-weight:900;letter-spacing:-.045em}.logo em{font-style:normal;color:var(--lime)}.status{font-size:10px;color:var(--muted);border:1px solid var(--line);padding:7px 9px;border-radius:999px}.status.live{color:var(--lime)}
+.hero{border:1px solid var(--line);background:linear-gradient(145deg,rgba(200,255,98,.07),rgba(109,228,255,.025) 45%,rgba(171,144,255,.04));border-radius:26px;padding:22px 20px}.eyebrow{color:var(--lime);font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:850}.hero h1{font-size:30px;line-height:1.03;letter-spacing:-.045em;margin:9px 0}.hero p{font-size:13px;line-height:1.5;color:#AEB7C5;margin:0}.signals{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px}.signal{font-size:10px;color:#AEB7C5;background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:11px;padding:7px 9px}.signal b{color:#fff}
+.refresh{width:100%;border:0;background:var(--lime);color:#0A0D08;border-radius:16px;padding:14px;margin-top:13px;font-weight:900}
+.section{display:flex;align-items:end;justify-content:space-between;margin:21px 2px 10px}.section h2{font-size:18px;margin:0;letter-spacing:-.035em}.section small{font-size:10px;color:var(--muted)}
+.feed{display:grid;gap:11px}.story{border:1px solid var(--line);background:linear-gradient(155deg,rgba(255,255,255,.027),transparent 48%),var(--p);border-radius:23px;padding:18px;position:relative;overflow:hidden}.story .source{font-size:10px;color:var(--cyan);text-transform:uppercase;letter-spacing:.13em;font-weight:850}.story .fresh{float:right;color:var(--muted);font-size:10px}.story h3{font-size:22px;line-height:1.08;letter-spacing:-.04em;margin:8px 0 11px}.story .what{font-size:14px;line-height:1.5;color:#D8DEE8}.why{margin-top:13px;padding:13px 14px;border-radius:15px;background:rgba(200,255,98,.055);border:1px solid rgba(200,255,98,.12);font-size:13px;line-height:1.45}.why b{color:var(--lime)}.lesson{margin-top:9px;padding:13px 14px;border-radius:15px;background:var(--p2);font-size:13px;line-height:1.45;color:#C8CFDA}.lesson b{color:#fff}
+.actions{display:grid;grid-template-columns:auto auto auto 1fr;gap:7px;margin-top:14px}.act{border:1px solid var(--line);background:#181D26;color:#AAB3C1;border-radius:12px;padding:9px 10px;font-size:12px}.act.liked{background:rgba(200,255,98,.12);color:var(--lime);border-color:rgba(200,255,98,.25)}.act.disliked{background:rgba(255,115,128,.10);color:var(--red);border-color:rgba(255,115,128,.22)}.deep{justify-self:end;color:var(--cyan)}
+.drill{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}.drillQ{font-size:13px;font-weight:750;line-height:1.42}.choices{display:grid;gap:7px;margin-top:9px}.choice{border:1px solid var(--line);background:#171C25;color:#DDE2EA;border-radius:12px;padding:10px;text-align:left;font-size:12px}.choice.good{border-color:rgba(200,255,98,.55);background:rgba(200,255,98,.08)}.choice.bad{border-color:rgba(255,115,128,.5);background:rgba(255,115,128,.07)}.explain{font-size:11px;color:var(--muted);line-height:1.4;margin-top:8px}
+.aiPanel{position:fixed;inset:0;background:rgba(5,7,10,.78);backdrop-filter:blur(10px);z-index:50;display:none;align-items:flex-end}.aiPanel.on{display:flex}.sheet{width:min(760px,100%);margin:auto;background:#10141C;border:1px solid var(--line);border-radius:27px 27px 0 0;padding:20px 17px calc(25px + var(--safe));max-height:85vh;overflow:auto}.sheetTop{display:flex;justify-content:space-between;align-items:center}.sheet h3{font-size:22px;letter-spacing:-.04em;margin:12px 0}.close{border:0;background:#1A202A;color:#AAB3C1;border-radius:12px;padding:8px 10px}.aiText{font-size:14px;line-height:1.58;color:#D7DDE7;white-space:pre-wrap}.aiActions{display:flex;gap:8px;margin-top:15px}.aiAction{flex:1;border:1px solid var(--line);background:#181D26;color:#fff;padding:11px;border-radius:13px}.loader{height:4px;background:#1B2029;border-radius:99px;overflow:hidden;margin:12px 0}.loader:before{content:"";display:block;width:35%;height:100%;background:var(--lime);animation:load 1s infinite alternate}@keyframes load{to{transform:translateX(180%)}}
+.profileBox{border:1px solid var(--line);background:var(--p);border-radius:22px;padding:17px;margin-top:10px}.profileBox h3{font-size:15px;margin:0 0 10px}.weights{display:grid;gap:8px}.weight{display:grid;grid-template-columns:95px 1fr 30px;align-items:center;gap:8px;font-size:11px;color:#B3BDCB}.wbar{height:6px;background:#202631;border-radius:99px;overflow:hidden}.wbar i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--lime));border-radius:99px}.history{font-size:12px;color:var(--muted);line-height:1.5}
+.bottom{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(760px,100%);display:grid;grid-template-columns:repeat(3,1fr);background:rgba(8,10,15,.9);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:8px 12px calc(8px + var(--safe));z-index:30}.nav{border:0;background:none;color:#697383;font-size:10px;padding:6px}.nav span{font-size:18px;display:block}.nav.on{color:#fff}.nav.on span{color:var(--lime)}
+.view{display:none}.view.on{display:block}.empty{padding:30px;text-align:center;color:var(--muted);font-size:13px}.toast{position:fixed;left:50%;bottom:88px;transform:translateX(-50%) translateY(15px);opacity:0;background:#EEF1F5;color:#101318;padding:9px 12px;border-radius:11px;font-size:11px;font-weight:800;transition:.2s;z-index:80}.toast.on{opacity:1;transform:translateX(-50%)}
+@media(max-width:430px){.hero h1{font-size:28px}.story h3{font-size:21px}}
+</style></head>
 <body>
 <div class="app">
-  <div id="home" class="view on">
-    <div class="header"><div class="logo">Learning<i>OS</i></div><div class="avatar">EL</div></div>
-    <section class="hero">
-      <div class="overline">Today's edge</div>
-      <h1 id="heroTitle">Sharpen the decisions that matter.</h1>
-      <p id="heroSub">A 7-card session built around robotics, autonomy, China/India execution, strategy and leadership.</p>
-      <div class="heroStats">
-        <div class="chip">🔥 <b id="streakHome">1</b> day streak</div>
-        <div class="chip">✦ <b id="xpHome">0</b> XP</div>
-        <div class="chip">◎ <b id="accuracyHome">—</b> accuracy</div>
-      </div>
-      <button class="startBtn" onclick="startToday()">Start today's 6-minute session →</button>
-    </section>
-
-    <div class="sectionHead"><h2>Your focus</h2><span>weighted to current work</span></div>
-    <div class="focusGrid">
-      <div class="focus"><div class="ico">◎</div><b>Humanoid systems</b><small>Actuation, controls, team design</small></div>
-      <div class="focus"><div class="ico">◉</div><b>ADAS strategy</b><small>Safety, OEM value, competition</small></div>
-      <div class="focus"><div class="ico">⌁</div><b>China + India</b><small>Hiring, localization, execution</small></div>
-      <div class="focus"><div class="ico">◇</div><b>Executive judgment</b><small>Decisions, negotiation, communication</small></div>
-    </div>
-
-    <div class="sectionHead"><h2>Decision radar</h2><span>ideas worth keeping active</span></div>
-    <div class="radar">
-      <div class="radarItem"><div class="radarNum">01</div><div><b>Founding hires have network effects</b><small>Value the next five people a senior hire can attract, not only the CV in front of you.</small></div></div>
-      <div class="radarItem"><div class="radarNum">02</div><div><b>Demo metrics need denominators</b><small>Route mix, intervention severity and repeatability turn an autonomy headline into evidence.</small></div></div>
-      <div class="radarItem"><div class="radarNum">03</div><div><b>Policy can enter the BOM</b><small>Export controls and jurisdictional dependencies are increasingly architecture inputs.</small></div></div>
-    </div>
-  </div>
-
-  <div id="learn" class="view">
-    <div class="feedTop"><button class="back" onclick="go('home')">← Home</button><span class="progressTxt" id="progressTxt"></span></div>
-    <div class="progress"><div id="bar"></div></div>
-    <main class="card" id="lessonCard"></main>
-    <div class="cardActions"><span id="cardCount"></span><button class="save" id="saveBtn" onclick="toggleSave()">☆ Save</button></div>
-  </div>
-
-  <div id="topics" class="view">
-    <div class="header"><div class="logo">Your <i>map</i></div><div class="avatar">EL</div></div>
-    <div class="sectionHead"><h2>Mastery map</h2><span>tap a topic to train it</span></div>
-    <div class="topicList" id="topicList"></div>
-  </div>
-
-  <div id="library" class="view">
-    <div class="header"><div class="logo">Your <i>library</i></div><div class="avatar">EL</div></div>
-    <div class="libraryTabs">
-      <button class="libTab on" onclick="libMode='saved';renderLibrary(this)">Saved</button>
-      <button class="libTab" onclick="libMode='review';renderLibrary(this)">Review misses</button>
-      <button class="libTab" onclick="libMode='all';renderLibrary(this)">All cards</button>
-    </div>
-    <div class="savedList" id="savedList"></div>
-  </div>
-
-  <div id="profile" class="view">
-    <div class="header"><div class="logo">Learning <i>profile</i></div><div class="avatar">EL</div></div>
-    <div class="profileBox">
-      <h3>Your learning loop</h3>
-      <div class="metricGrid">
-        <div class="metric"><b id="pXP">0</b><small>XP</small></div>
-        <div class="metric"><b id="pStreak">1</b><small>streak</small></div>
-        <div class="metric"><b id="pSaved">0</b><small>saved</small></div>
-      </div>
-    </div>
-    <div class="profileBox">
-      <h3>Session design</h3>
-      <div class="toggleRow"><span>Harder questions first</span><div class="toggle on" id="hardToggle" onclick="toggleSetting('hardFirst',this)"><i></i></div></div>
-      <div class="toggleRow"><span>Repeat missed concepts</span><div class="toggle on" id="reviewToggle" onclick="toggleSetting('repeatMisses',this)"><i></i></div></div>
-      <div class="toggleRow"><span>Prioritize work-relevant topics</span><div class="toggle on" id="workToggle" onclick="toggleSetting('workWeight',this)"><i></i></div></div>
-      <button id="installBtn" class="install" onclick="installApp()">Install LearningOS</button>
-    </div>
-    <div class="profileBox">
-      <h3>How this is personalized</h3>
-      <p style="font-size:13px;color:var(--muted);line-height:1.55;margin:0">The feed deliberately overweights humanoid robotics, actuation, ADAS, China/India operating decisions, senior hiring, negotiation and executive communication. It tests judgment with scenarios rather than giving you generic trivia.</p>
-    </div>
-  </div>
+ <div id="today" class="view on">
+   <div class="header"><div class="logo">Learning<em>OS AI</em></div><div id="liveStatus" class="status">CURATED</div></div>
+   <section class="hero">
+     <div class="eyebrow">Your intelligence feed</div>
+     <h1>What changed, why it matters, what to learn.</h1>
+     <p>The feed ranks current stories against your evolving interests, then turns them into decision-relevant lessons instead of summaries.</p>
+     <div class="signals"><div class="signal">🔥 <b id="streak">1</b> streak</div><div class="signal">👍 <b id="likes">0</b> likes learned</div><div class="signal">🧠 <b id="interactions">0</b> signals</div></div>
+     <button class="refresh" onclick="loadFeed(true)">Refresh with latest intelligence ↻</button>
+   </section>
+   <div class="section"><h2>For you now</h2><small id="feedMeta">ranked for relevance</small></div>
+   <div id="feed" class="feed"></div>
+ </div>
+ <div id="saved" class="view">
+   <div class="header"><div class="logo">Saved <em>signal</em></div><div class="status">LIBRARY</div></div>
+   <div id="savedFeed" class="feed"></div>
+ </div>
+ <div id="profile" class="view">
+   <div class="header"><div class="logo">Your <em>model</em></div><div class="status">LOCAL</div></div>
+   <div class="profileBox"><h3>What the system currently thinks you want</h3><div id="weights" class="weights"></div></div>
+   <div class="profileBox"><h3>How it learns</h3><div class="history">👍 Like strongly increases topic, source and tag affinity. 👎 Dislike suppresses them. Saving is a high-value positive signal. Reading time gives a smaller implicit signal. Fast skipping is negative. Quiz misses increase future review probability. A small exploration bonus deliberately shows you adjacent material so the feed does not become an echo chamber.</div></div>
+   <div class="profileBox"><h3>Privacy</h3><div class="history">Your preference profile is stored on this device. The live AI endpoint receives a compact anonymous preference summary, not your identity. No database is required for v2.</div></div>
+   <div class="profileBox"><h3>AI connection</h3><div id="aiState" class="history">Checking…</div></div>
+ </div>
 </div>
+<nav class="bottom"><button class="nav on" data-v="today" onclick="go('today')"><span>⌂</span>Today</button><button class="nav" data-v="saved" onclick="go('saved')"><span>☆</span>Saved</button><button class="nav" data-v="profile" onclick="go('profile')"><span>◐</span>Model</button></nav>
 
-<nav class="bottom">
-  <button class="nav on" data-v="home" onclick="go('home')"><span class="nicon">⌂</span>Today</button>
-  <button class="nav" data-v="topics" onclick="go('topics')"><span class="nicon">◎</span>Map</button>
-  <button class="nav" data-v="library" onclick="go('library')"><span class="nicon">▤</span>Library</button>
-  <button class="nav" data-v="profile" onclick="go('profile')"><span class="nicon">◐</span>Profile</button>
-</nav>
-<div class="toast" id="toast"></div>
+<div id="aiPanel" class="aiPanel" onclick="if(event.target===this)closeAI()"><div class="sheet"><div class="sheetTop"><div class="eyebrow">AI tutor</div><button class="close" onclick="closeAI()">Close</button></div><h3 id="aiTitle"></h3><div id="aiBody" class="aiText"></div><div id="aiLoad" class="loader" style="display:none"></div><div class="aiActions"><button class="aiAction" onclick="runAI('deeper')">Go deeper</button><button class="aiAction" onclick="runAI('challenge')">Challenge me</button><button class="aiAction" onclick="runAI('implication')">Implication</button></div></div></div>
+<div id="toast" class="toast"></div>
 
 <script>
-const BANK = [{"id": "r1", "topic": "Robotics", "kind": "concept", "difficulty": 2, "title": "Actuator choice is a system decision", "kicker": "Humanoids", "body": "A reducer cannot be judged alone. Harmonic, planetary, cycloidal, quasi-direct and other architectures change backlash, efficiency, backdrivability, reflected inertia, packaging, thermal behavior, cost and control complexity.", "insight": "A 'better reducer' can make the robot worse if it forces a larger motor, worse thermal path or poorer force control.", "prompt": "When comparing two joint designs, ask for the full joint mass, peak/continuous torque, efficiency map, backlash, reflected inertia, thermal limit and cost. Never accept reducer efficiency as the answer.", "memory": "Joint > reducer."}, {"id": "r2", "topic": "Robotics", "kind": "scenario", "difficulty": 3, "title": "The impressive actuator demo", "kicker": "Decision drill", "body": "A supplier shows a compact actuator with excellent peak torque and a beautiful bench demo. Continuous torque data is missing, thermal test is only 90 seconds, and gearbox lifetime is stated as 'target 10,000 h'.", "question": "What is the highest-value next request?", "choices": ["Ask for a lower price immediately", "Request continuous torque vs temperature, duty-cycle test, lifetime methodology and teardown evidence", "Ask whether competitors use the same supplier"], "correct": 1, "explain": "Peak torque is easy to market. Thermal sustainability and lifetime are what determine whether the actuator survives a real robot duty cycle."}, {"id": "r3", "topic": "Robotics", "kind": "concept", "difficulty": 3, "title": "Reflected inertia quietly kills control", "kicker": "Controls", "body": "A high gear ratio multiplies the motor's apparent inertia at the output roughly with the square of the ratio. That can make a joint feel stiff and less responsive even when static torque looks excellent.", "insight": "This is one reason high reduction ratio is not free. It helps torque multiplication while hurting backdrivability and dynamic transparency.", "prompt": "If a joint is hard to control in contact, look at reflected inertia and drivetrain friction before blaming the controller.", "memory": "Ratio helps torque, squares inertia."}, {"id": "r4", "topic": "Robotics", "kind": "concept", "difficulty": 3, "title": "Motor Kv, Kt and the design trade", "kicker": "Actuation", "body": "Motor torque constant Kt tells you torque per amp. Speed constant Kv is inversely related. A winding optimized for more torque per amp generally trades against speed per volt.", "insight": "The right winding depends on bus voltage, required joint speed, gearing, thermal envelope and controller current limits.", "prompt": "Do not ask 'which motor is stronger?'. Ask whether the winding, bus voltage and reduction ratio place the motor in the efficient region for the target motion.", "memory": "Torque, speed, voltage are coupled."}, {"id": "r5", "topic": "Robotics", "kind": "scenario", "difficulty": 4, "title": "Two senior actuation candidates", "kicker": "Hiring drill", "body": "Candidate A has famous-company pedigree and deep reducer experience. Candidate B has less prestige but personally designed motors, transmission, thermal validation and supplier ramp. You already have reducer depth in the team.", "question": "Who has higher marginal value?", "choices": ["A, because pedigree reduces risk", "B, because complementary motor and end-to-end joint depth closes the actual team gap", "They are equivalent"], "correct": 1, "explain": "Hiring quality is not just individual strength. The question is which capability is missing from the system you are building."}, {"id": "a1", "topic": "ADAS", "kind": "concept", "difficulty": 3, "title": "L2++ is a system, not a perception demo", "kicker": "Autonomy", "body": "A low-cost competitor can look strong in a short demo because perception quality is only one layer. Production L2++ also needs policy, safety architecture, validation, corner-case handling, driver interaction, map or environmental priors, fleet learning and SOP discipline.", "insight": "The strongest answer to 'perception is commoditized' is not to deny commoditization. It is to identify where system-level safety and scalable validation still differentiate.", "prompt": "In competitor reviews, separate demo quality from production evidence: SOP volume, intervention distribution, safety cases, validation scale, OTA maturity and failure behavior.", "memory": "Demo ≠ production system."}, {"id": "a2", "topic": "ADAS", "kind": "scenario", "difficulty": 4, "title": "The 15-minute intervention claim", "kicker": "Metric drill", "body": "A hands-free vehicle achieves 15 minutes between interventions on a selected route. The team is excited.", "question": "What makes this metric decision-grade?", "choices": ["A longer marketing video", "Route mix, intervention taxonomy, denominator, repeat runs, confidence intervals and safety-critical severity", "Comparing only to last week's best run"], "correct": 1, "explain": "A headline MTBI number without route composition and intervention severity can hide more than it reveals."}, {"id": "a3", "topic": "ADAS", "kind": "concept", "difficulty": 4, "title": "False AEB is a policy problem too", "kicker": "Safety", "body": "False AEB can originate in perception, fusion, prediction, calibration, localization or policy thresholds. Fixing it by simply disabling a class can reduce nuisance events while creating an unacceptable safety hole.", "insight": "The right debug tree asks which signal generated the trigger, whether fusion confidence was coherent, what prediction horizon fired and what requirement the threshold was protecting.", "prompt": "Treat false positives and false negatives as a coupled optimization, not independent bugs.", "memory": "Suppressing alarms can suppress safety."}, {"id": "a4", "topic": "ADAS", "kind": "concept", "difficulty": 3, "title": "Hardware agnostic has a hidden bill", "kicker": "Architecture", "body": "A software stack that runs across many SoCs sounds attractive, but hardware diversity moves cost into abstraction layers, optimization, validation, toolchains and long-tail integration.", "insight": "Hardware agnosticism is commercially valuable only if the incremental validation and performance tax stays below the value of supplier flexibility.", "prompt": "Ask a hardware-agnostic vendor how many production SoCs are truly validated, with what performance delta and who owns integration failures.", "memory": "Portability shifts cost, it does not erase it."}, {"id": "a5", "topic": "ADAS", "kind": "scenario", "difficulty": 4, "title": "OEM says 'cheaper L2++ exists'", "kicker": "Commercial drill", "body": "An OEM points to a low-cost China stack and asks why they should pay more.", "question": "Best first response?", "choices": ["Argue that the competitor is not credible", "Ask what they are comparing: feature demo, SOP maturity, safety performance, validation burden, liability or lifetime economics", "Immediately discount price"], "correct": 1, "explain": "You want to change the comparison basis from BOM price to system outcome and integration risk before negotiating price."}, {"id": "ai1", "topic": "AI", "kind": "concept", "difficulty": 3, "title": "Agents fail at interfaces, not only intelligence", "kicker": "Applied AI", "body": "Agentic systems often fail because tools are ambiguous, state is poorly represented, permissions are unclear, or success criteria are not machine-checkable.", "insight": "Improving the model can help, but a clean action schema and explicit state machine often deliver a larger reliability gain.", "prompt": "When an agent fails, separate reasoning failure from tool-contract failure.", "memory": "Better interfaces can beat bigger models."}, {"id": "ai2", "topic": "AI", "kind": "concept", "difficulty": 3, "title": "Inference economics becomes product strategy", "kicker": "AI business", "body": "If a feature triggers a large model hundreds of times per user, inference cost becomes part of product architecture. Routing, caching, smaller models and selective reasoning can define gross margin.", "insight": "Model quality is not the objective. Quality per dollar per unit of latency is closer to the commercial objective.", "prompt": "For any AI feature, estimate cost per successful user outcome, not cost per token.", "memory": "Optimize outcome/$, not model size."}, {"id": "ai3", "topic": "AI", "kind": "scenario", "difficulty": 3, "title": "Build or buy the model layer?", "kicker": "Strategy drill", "body": "A startup can use a frontier API today or spend six months building a proprietary model. Its real differentiation is a unique spatial data layer and workflow integration.", "question": "What is the default strategic choice?", "choices": ["Build a foundation model immediately", "Use external models until model ownership is clearly the bottleneck or moat", "Avoid AI entirely"], "correct": 1, "explain": "Owning an undifferentiated model can consume capital while distracting from the proprietary data and workflow layer that actually creates defensibility."}, {"id": "ai4", "topic": "AI", "kind": "concept", "difficulty": 4, "title": "RAG quality is retrieval quality", "kicker": "Architecture", "body": "Retrieval-augmented generation is only as good as the evidence retrieved. Chunking, metadata, filters, ranking, freshness and source authority often matter more than prompt cleverness.", "insight": "If the correct evidence never reaches the model, prompt tuning cannot recover it.", "prompt": "Measure retrieval recall separately from answer quality.", "memory": "No evidence in, no truth out."}, {"id": "s1", "topic": "Strategy", "kind": "concept", "difficulty": 3, "title": "The constraint is the strategy", "kicker": "Execution", "body": "Organizations often improve the part they can see rather than the part limiting throughput. The Theory of Constraints says system output is governed by the bottleneck.", "insight": "Adding more candidates to a hiring funnel does not help if the real bottleneck is slow offer approval. More engineers do not help if validation capacity is saturated.", "prompt": "Ask weekly: what single constraint most limits the outcome now?", "memory": "Optimize the bottleneck."}, {"id": "s2", "topic": "Strategy", "kind": "scenario", "difficulty": 4, "title": "Speed vs alignment", "kicker": "Operating model", "body": "A cross-border team is losing candidates because every offer gets re-litigated by multiple stakeholders. Quality concerns are legitimate, but decision latency is high.", "question": "Best structural fix?", "choices": ["Add another approval layer", "Define decision rights, pre-agreed compensation envelopes and explicit escalation thresholds", "Let recruiters decide everything"], "correct": 1, "explain": "Speed improves when decision rights are clear before the case arrives, not when people are told to 'move faster'."}, {"id": "s3", "topic": "Strategy", "kind": "concept", "difficulty": 4, "title": "Real options thinking", "kicker": "Capital allocation", "body": "A small investment can be valuable because it buys the right, but not the obligation, to make a larger move after uncertainty resolves.", "insight": "Pilots, option agreements, minority investments and staged hiring can create strategic flexibility when the upside is large and uncertainty is high.", "prompt": "Value the information and future choice created by the first step, not only its standalone ROI.", "memory": "Pay small to preserve a big choice."}, {"id": "s4", "topic": "Strategy", "kind": "concept", "difficulty": 3, "title": "A milestone is not a calendar date", "kicker": "Execution", "body": "A useful milestone is a falsifiable state of the product, not 'three months passed'. It has measurable entry and exit criteria.", "insight": "For a robot program, 'lower body walking under defined payload, speed, terrain and thermal constraints' is stronger than 'lower body complete'.", "prompt": "Tie upside and accountability to observable states, not effort or elapsed time.", "memory": "Milestone = testable state."}, {"id": "s5", "topic": "Strategy", "kind": "scenario", "difficulty": 4, "title": "The prestigious candidate", "kicker": "Leadership drill", "body": "A senior candidate has an exceptional title and network but will probably stay at the architecture level. Your immediate program risk is hands-on bring-up during the first six months.", "question": "What should dominate the decision?", "choices": ["Title seniority", "Capability fit to the next critical milestone", "Company brand on the CV"], "correct": 1, "explain": "The value of a hire is time-dependent. Optimize for the capability that unlocks the next bottleneck."}, {"id": "ic1", "topic": "India & China", "kind": "concept", "difficulty": 3, "title": "Localization is more than local BOM", "kicker": "Market execution", "body": "OEM localization decisions include cost, supply resilience, homologation, support, warranty ownership, engineering response time, data rules and political optics.", "insight": "A locally sourced component with remote decision-making can still feel non-local to an OEM.", "prompt": "When an OEM asks for localization, clarify which dimension they actually need.", "memory": "Local product, support, liability, data, control."}, {"id": "ic2", "topic": "India & China", "kind": "scenario", "difficulty": 4, "title": "The China hiring premium", "kicker": "Talent market", "body": "A rare humanoid leader asks for compensation far above the original envelope. The person could accelerate team formation and attract several strong engineers.", "question": "How should the premium be evaluated?", "choices": ["Against the original salary band only", "Against time saved, recruiting leverage, technical risk reduction and milestone-linked upside", "Reject any exception to preserve internal symmetry"], "correct": 1, "explain": "For a founding technical hire, compensation can buy a talent network and execution velocity, not just one person's labor. The exception still needs explicit milestone economics."}, {"id": "ic3", "topic": "India & China", "kind": "concept", "difficulty": 3, "title": "Non-compete risk is a portfolio constraint", "kicker": "Hiring", "body": "In a concentrated talent market, many of the best candidates may carry restrictive covenants. Treating each case as a surprise makes hiring slow and inconsistent.", "insight": "The scalable solution is a legal risk framework by jurisdiction, role, information access and competitor class, with pre-agreed red lines.", "prompt": "Convert recurring legal ambiguity into a hiring policy.", "memory": "Repeated exception = missing policy."}, {"id": "ic4", "topic": "India & China", "kind": "concept", "difficulty": 3, "title": "India OEMs optimize for lifetime burden", "kicker": "Automotive", "body": "A technology can win a demo and still lose a sourcing decision if it creates integration, warranty, service, calibration or supplier-management burden for the OEM.", "insight": "The commercial product is not only the ECU and software. It is the reduction in lifetime program risk.", "prompt": "Sell the OEM's avoided work, not only your feature list.", "memory": "OEM buys burden reduction."}, {"id": "l1", "topic": "Leadership", "kind": "concept", "difficulty": 3, "title": "Complementarity beats cloning", "kicker": "Team design", "body": "A founding team should not be three versions of the same strong engineer. It should cover technical authority, execution integration and critical domain depth with clear accountability.", "insight": "A strong lead plus strong execution owner can outperform two ambiguous co-leads.", "prompt": "For every senior hire, write the capability that becomes redundant if they join and the capability that remains missing.", "memory": "Build a system of people."}, {"id": "l2", "topic": "Leadership", "kind": "scenario", "difficulty": 4, "title": "Two people are acting like co-leads", "kicker": "Org design", "body": "Both are capable. One has deeper seniority and mentoring strength; the other is faster on cross-functional execution. Stakeholders start routing decisions to whichever gives the answer they prefer.", "question": "Best design?", "choices": ["Keep informal co-leadership", "Name one accountable lead and define the second as execution lead with explicit scope", "Rotate leadership weekly"], "correct": 1, "explain": "Ambiguous accountability creates decision shopping. Complementary roles work when the escalation path is unambiguous."}, {"id": "l3", "topic": "Leadership", "kind": "concept", "difficulty": 3, "title": "Interview for evidence, not fluency", "kicker": "Hiring", "body": "Senior candidates can sound excellent while describing team accomplishments. The interview must force decomposition into personal decisions, constraints, tradeoffs and measurable outcomes.", "insight": "Ask: what did you personally decide, what alternative did you reject, what failed, and what number changed because of your work?", "prompt": "If the answer stays at 'we', keep drilling.", "memory": "From 'we' to evidence."}, {"id": "l4", "topic": "Leadership", "kind": "concept", "difficulty": 4, "title": "The founder-effect hire", "kicker": "Team formation", "body": "The first few hires change who applies next, what standards feel normal and how decisions get made. Their network and working style have multiplicative effects.", "insight": "This makes early senior hiring asymmetric: a slightly more expensive but high-gravity hire can be cheaper at the system level.", "prompt": "Evaluate early hires partly by the quality of the next five people they can attract.", "memory": "Hire the next network, not only the next person."}, {"id": "c1", "topic": "Communication", "kind": "concept", "difficulty": 2, "title": "Decision first, history second", "kicker": "Executive communication", "body": "Executives should not have to infer what you want from a long chronology. Start with the decision required, your recommendation and the one or two reasons that matter most.", "insight": "Background belongs below the decision, unless the background itself changes the decision.", "prompt": "Before sending: can the recipient understand the ask in the first three lines?", "memory": "Decision > recommendation > evidence."}, {"id": "c2", "topic": "Communication", "kind": "scenario", "difficulty": 3, "title": "A compensation exception", "kicker": "Executive drill", "body": "A candidate is above the original envelope, but the team believes the hire is strategically important.", "question": "Best framing to leadership?", "choices": ["'He is expensive but we really like him.'", "'Request approval for X envelope. Premium buys Y capability and Z recruiting leverage. Upside is milestone-linked. Main risk is A.'", "Send the full interview transcript"], "correct": 1, "explain": "An exception should be framed as an explicit investment decision with return logic and risk controls."}, {"id": "c3", "topic": "Negotiation", "kind": "concept", "difficulty": 3, "title": "Do not negotiate against yourself", "kicker": "Commercial", "body": "When the other side says your price is high, that is information, not yet a concession request you must satisfy.", "insight": "First uncover comparison basis, budget authority, alternatives, timing and what would change the decision.", "prompt": "A price objection should trigger diagnosis before discounting.", "memory": "Objection first, concession later."}, {"id": "c4", "topic": "Negotiation", "kind": "concept", "difficulty": 4, "title": "Trade variables, do not split differences", "kicker": "Deal craft", "body": "Good negotiations exchange variables that have different values to each side: timing, scope, exclusivity, payment schedule, option rights, support level, milestones or risk allocation.", "insight": "Splitting the difference wastes the opportunity to create value through asymmetric preferences.", "prompt": "List at least five tradable variables before a major negotiation.", "memory": "Trade, do not average."}, {"id": "c5", "topic": "Communication", "kind": "concept", "difficulty": 3, "title": "Separate fact, inference and ask", "kicker": "Clarity", "body": "A strong update distinguishes what happened, what you think it means and what you need from the recipient.", "insight": "This prevents debates over interpretation from contaminating factual alignment.", "prompt": "Format difficult updates mentally as: Facts → Interpretation → Decision/Ask.", "memory": "Fact. Meaning. Ask."}, {"id": "g1", "topic": "Geopolitics", "kind": "concept", "difficulty": 3, "title": "Export controls are architecture constraints", "kicker": "Technology policy", "body": "Controls on advanced compute, semiconductor equipment or dual-use technology can change supplier choice, product partitioning, geography of R&D and even which customers can be served.", "insight": "For cross-border technology teams, geopolitics is no longer an externality. It can become a design input.", "prompt": "For critical technology, map which components, software and know-how create jurisdictional dependency.", "memory": "Policy can enter the BOM."}, {"id": "g2", "topic": "Geopolitics", "kind": "concept", "difficulty": 4, "title": "Friend-shoring is not de-risking by default", "kicker": "Supply chains", "body": "Moving supply to politically aligned countries can reduce one geopolitical risk while increasing cost, concentration, logistics or capability risk.", "insight": "Resilience is about failure-mode diversity, not simply moving from one country to another.", "prompt": "Ask whether two suppliers actually share the same upstream dependency.", "memory": "Two suppliers can be one supply chain."}, {"id": "g3", "topic": "Geopolitics", "kind": "scenario", "difficulty": 4, "title": "China capability, global product", "kicker": "Operating model", "body": "A China engineering center offers exceptional robotics talent and supplier speed, while the product must remain globally deployable under changing technology restrictions.", "question": "Best architecture principle?", "choices": ["Centralize everything in one country", "Modularize interfaces, IP boundaries, supplier alternatives and data access so geography can change without rewriting the product", "Avoid China talent entirely"], "correct": 1, "explain": "Operational modularity creates strategic options when regulation changes."}, {"id": "g4", "topic": "Geopolitics", "kind": "concept", "difficulty": 3, "title": "Chokepoints convert geography into leverage", "kicker": "Trade", "body": "A narrow route carrying disproportionate trade or energy flow can give geography strategic value far beyond its physical size.", "insight": "The same logic applies to technological chokepoints such as lithography, advanced packaging, EDA or specialized materials.", "prompt": "Look for concentrated dependencies in both maps and supply chains.", "memory": "Small node, large leverage."}, {"id": "f1", "topic": "Finance", "kind": "concept", "difficulty": 3, "title": "Compensation envelope vs salary", "kicker": "Management finance", "body": "A compensation envelope can include base, annual cash grant, milestone upside, retention and one-time components. The structure matters because fixed cost and performance-linked cost have different risk.", "insight": "For uncertain high-impact hires, variable milestone-linked upside can preserve attraction while reducing unconditional fixed commitment.", "prompt": "Compare offers on expected cost, worst-case fixed cost and milestone alignment, not headline total only.", "memory": "Structure changes risk."}, {"id": "f2", "topic": "Finance", "kind": "concept", "difficulty": 3, "title": "Expected value hides tail risk", "kicker": "Decision finance", "body": "Two decisions can have the same expected value but radically different downside distributions. A low-probability catastrophic loss can dominate the choice.", "insight": "This matters in safety, legal exposure, supply chain and strategic bets where ruin is not acceptable.", "prompt": "Alongside expected value, ask: what is the credible worst case and can we survive it?", "memory": "Average outcome is not enough."}, {"id": "f3", "topic": "Finance", "kind": "scenario", "difficulty": 3, "title": "Pay more for a key hire?", "kicker": "ROI drill", "body": "A candidate costs 40% above plan but may accelerate a critical program by three months and attract two additional hires.", "question": "What is missing from a salary-band comparison?", "choices": ["Nothing, salary band is sufficient", "The economic value of time-to-milestone and recruiting leverage", "The candidate's age"], "correct": 1, "explain": "For a bottleneck hire, the relevant comparison is incremental program value versus incremental cost."}, {"id": "p1", "topic": "Personal OS", "kind": "concept", "difficulty": 2, "title": "Protect the decision layer", "kicker": "Executive effectiveness", "body": "When your day contains many operational messages, the danger is spending cognitive bandwidth on routing and formatting rather than decisions that only you can make.", "insight": "Delegate information gathering and packaging. Keep judgment, tradeoffs, talent calls and relationship moments at your level.", "prompt": "Before doing a task, ask: does this require my judgment, authority or relationship? If not, why am I doing it?", "memory": "Protect judgment bandwidth."}, {"id": "p2", "topic": "Personal OS", "kind": "scenario", "difficulty": 3, "title": "Twenty urgent messages", "kicker": "Prioritization drill", "body": "You have twenty messages, three hiring decisions, one customer escalation and a board deliverable due tomorrow.", "question": "What should be triaged first?", "choices": ["Newest message first", "Irreversible/high-leverage decisions and external commitments first, then delegate routing work", "Answer every message quickly to clear the inbox"], "correct": 1, "explain": "Inbox order is not priority order. Protect high-leverage decisions and deadlines with external consequence."}, {"id": "p3", "topic": "Personal OS", "kind": "concept", "difficulty": 3, "title": "Decision log beats memory", "kicker": "Learning loop", "body": "For important calls, record the decision, assumptions, confidence and what would prove it wrong. Review later against outcomes.", "insight": "This separates decision quality from outcome luck and improves calibration over time.", "prompt": "Log only the decisions where learning from being wrong would matter.", "memory": "Judge the process, then the outcome."}];
-const META = {"Robotics": {"icon": "◎", "desc": "Actuation, controls, system design"}, "ADAS": {"icon": "◉", "desc": "Autonomy, safety, OEM strategy"}, "AI": {"icon": "✦", "desc": "Agents, models, product economics"}, "Strategy": {"icon": "◇", "desc": "Bottlenecks, options, execution"}, "India & China": {"icon": "⌁", "desc": "Talent, localization, market execution"}, "Leadership": {"icon": "△", "desc": "Hiring, org design, accountability"}, "Communication": {"icon": "↗", "desc": "Executive writing and negotiation"}, "Negotiation": {"icon": "⇄", "desc": "Commercial and deal craft"}, "Geopolitics": {"icon": "⊕", "desc": "Industrial policy and supply chains"}, "Finance": {"icon": "∑", "desc": "Decision economics and incentives"}, "Personal OS": {"icon": "◐", "desc": "Focus, prioritization, learning loops"}};
-const TOPIC_WEIGHTS = {"Robotics":5,"ADAS":5,"India & China":4,"Strategy":4,"Leadership":4,"Communication":3,"Negotiation":3,"AI":3,"Geopolitics":2,"Finance":2,"Personal OS":2};
-
-let state=JSON.parse(localStorage.getItem("elie_learning_os_v1")||"{}");
-state.xp??=0; state.streak??=1; state.saved??=[]; state.wrong??=[]; state.seen??={}; state.correct??=0; state.answers??=0;
-state.settings??={hardFirst:true,repeatMisses:true,workWeight:true};
-const todayKey=dateKey(new Date());
-if(state.lastVisit!==todayKey){
- if(state.lastVisit){
-  const diff=Math.round((new Date(todayKey+"T00:00:00")-new Date(state.lastVisit+"T00:00:00"))/86400000);
-  state.streak=diff===1?state.streak+1:1;
- }
- state.lastVisit=todayKey; persist();
+const FALLBACK=[{"id": "reuters-unitree-chatgpt", "type": "news", "topic": "Robotics", "source": "Reuters", "published": "2026-08-20", "title": "Unitree says robotics is approaching a 'ChatGPT moment'", "url": "https://www.reuters.com/world/asia-pacific/robots-poised-chatgpt-moment-unitree-ceo-says-2026-08-20/", "what": "Unitree CEO Wang Xingxing says embodied intelligence is moving toward an inflection point, while acknowledging the software breakthrough may still be years away.", "why": "For a humanoid program, this is a useful warning against confusing hardware spectacle with generalizable robot intelligence. China is scaling hardware much faster than the software stack is becoming general.", "lesson": "The commercialization bottleneck can migrate. Once mechanical capability and supply chains improve, the scarce layer becomes robust generalization, data and closed-loop learning.", "question": "If hardware performance doubles but task generalization barely improves, where should the next marginal engineering headcount go?", "choices": ["More mechanical packaging", "Data, world models and real-world learning infrastructure", "Industrial design"], "correct": 1, "explain": "Once hardware clears the minimum task envelope, generalization and data loops become the limiting constraint.", "tags": ["humanoid", "china", "embodied-ai"]}, {"id": "reuters-robot-games", "type": "news", "topic": "Robotics", "source": "Reuters", "published": "2026-08-22", "title": "China's robot games shift from spectacle toward commercial proof", "url": "https://www.reuters.com/world/asia-pacific/science-fair-strategic-showcase-decade-chinas-robot-games-2026-08-22/", "what": "China's robot competitions have evolved into a national showcase and increasingly a proving ground for products, with more emphasis on practical industrial tasks.", "why": "This is directly relevant to how you should judge humanoid progress: a race or backflip proves dynamics, not economic usefulness. The important transition is toward repeatable task completion under industrial constraints.", "lesson": "Demo metrics and deployment metrics are different species. Commercial readiness needs uptime, intervention rate, task cycle time, payload, thermal stability, failure recovery and cost per productive hour.", "question": "Which metric would best expose whether a flashy humanoid demo is becoming a factory product?", "choices": ["Maximum running speed", "Cost per productive hour at required uptime", "Number of social-media views"], "correct": 1, "explain": "Factory economics combine reliability, intervention burden, throughput and cost.", "tags": ["humanoid", "commercialization", "china"]}, {"id": "globes-ltx-robots", "type": "news", "topic": "AI", "source": "Globes", "published": "2026-08-19", "title": "Lightricks spinoff LTX wants video models to train robots", "url": "https://en.globes.co.il/en/article-lightricks-spinoff-uses-video-to-train-robots-1001552807", "what": "LTX is positioning video generation not only as media creation but as infrastructure for robot training, simulation and real-time avatars.", "why": "This intersects with a core embodied-AI question: whether abundant video can become a scalable source of physical priors before expensive robot data is collected.", "lesson": "Video is rich in semantics and motion but weak in forces, contact state and action labels. The winning stack may use video for broad priors, then simulation and robot data for embodiment-specific grounding.", "question": "What is the biggest missing signal if you try to learn manipulation only from ordinary video?", "choices": ["Color information", "Forces, contacts and executed actions", "Object identity"], "correct": 1, "explain": "Pixels reveal motion but not the hidden control signals and physical interaction forces needed for robust manipulation.", "tags": ["video-models", "robot-learning", "sim2real"]}, {"id": "globes-robotaxi-reg", "type": "news", "topic": "ADAS", "source": "Globes", "published": "2026-08-02", "title": "Israel prepares a regulatory path for robotaxis in 2027", "url": "https://en.globes.co.il/en/article-israel-prepares-regulation-for-robotaxis-in-2027-1001551062", "what": "Israel is preparing to adopt a UNECE-based framework for higher-level autonomous driving, including safety management, incident reporting and manufacturer responsibility.", "why": "Regulation is shifting the autonomy argument from 'can the car drive?' toward 'can the manufacturer prove and govern safety at deployment scale?'", "lesson": "Safety capability and safety evidence are separate assets. Regulation rewards organizations that can produce traceable validation, monitoring and incident-management systems, not only strong driving behavior.", "question": "Which capability becomes more valuable as autonomy regulation matures?", "choices": ["A better demo route", "A traceable safety case and fleet monitoring loop", "More aggressive marketing"], "correct": 1, "explain": "Regulatory approval requires evidence, responsibility and operational monitoring in addition to driving quality.", "tags": ["robotaxi", "regulation", "safety"]}, {"id": "tc-river-personal-ai", "type": "news", "topic": "AI", "source": "TechCrunch", "published": "2026-08-11", "title": "River AI raises $1.1B around personally trainable AI", "url": "https://techcrunch.com/2026/08/11/general-catalyst-leads-1-1b-round-into-2-month-old-river-ai/", "what": "River AI is betting that assistants should become personally trainable rather than remain generic models steered mainly through prompts.", "why": "That is exactly the product thesis behind this LearningOS: personalization should become an evolving model of your preferences and decision patterns, not a static list of topics.", "lesson": "Personalization has levels: prompt context, retrieval of history, learned preference scores, and actual model adaptation. The cheapest useful step is usually behavior-derived ranking before fine-tuning.", "question": "For a personal learning feed with limited data, what should come before model fine-tuning?", "choices": ["Behavioral ranking and retrieval", "Training a foundation model", "Ignoring feedback until there are millions of users"], "correct": 0, "explain": "Ranking from explicit and implicit behavior delivers substantial personalization with far less data and cost.", "tags": ["personal-ai", "preference-learning", "agents"]}, {"id": "tc-naive-agents", "type": "news", "topic": "AI", "source": "TechCrunch", "published": "2026-08-06", "title": "Naïve's agent infrastructure highlights inference as an operating cost", "url": "https://techcrunch.com/2026/08/06/naive-raises-28-5m-to-automate-the-grunt-work-of-setting-up-and-running-a-company/", "what": "Naïve is building infrastructure for autonomous businesses, including model routing, memory, governance and cheaper serverless agent execution.", "why": "The interesting part is not 'agents can run a company.' It is that once agents run continuously, model routing, memory and governance become economic infrastructure.", "lesson": "Agent architecture is an operations problem. Reliability and gross margin depend on which model handles which task, what context is retained, and where human approval is mandatory.", "question": "What is the best unit metric for a production agent?", "choices": ["Tokens generated", "Cost per successful, policy-compliant outcome", "Largest model used"], "correct": 1, "explain": "Outcome-level cost captures model routing, retries, latency and failure burden better than raw token cost.", "tags": ["agents", "inference", "governance"]}];
+const DEFAULT_WEIGHTS={"Robotics":5,"ADAS":5,"AI":3.5,"Strategy":4,"India & China":4,"Leadership":3.5,"Geopolitics":2.5,"Finance":2,"Communication":3};
+let state=JSON.parse(localStorage.getItem("learningos_ai_v2")||"{}");
+state.topicWeights??={...DEFAULT_WEIGHTS};state.sourceWeights??={"Reuters":2,"Globes":2,"Ynet":1.5,"TechCrunch":1.5};state.tagWeights??={};state.saved??=[];state.feedback??={};state.quizMisses??={};state.signals??=[];state.streak??=1;
+const today=new Date().toISOString().slice(0,10);if(state.lastVisit!==today){if(state.lastVisit){let d=(new Date(today)-new Date(state.lastVisit))/86400000;state.streak=Math.round(d)===1?state.streak+1:1}state.lastVisit=today;save()}
+let feed=[],viewStart={};let activeAI=null;
+function save(){localStorage.setItem("learningos_ai_v2",JSON.stringify(state))}
+function compactProfile(){return {topics:state.topicWeights,sources:state.sourceWeights,tags:Object.fromEntries(Object.entries(state.tagWeights).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,25)),recent:state.signals.slice(-40),misses:Object.keys(state.quizMisses).filter(k=>state.quizMisses[k]>0).slice(-15)}}
+function adjust(obj,key,delta,min=-5,max=12){obj[key]=Math.max(min,Math.min(max,(obj[key]||0)+delta))}
+function signal(item,type){
+ const mult={like:1,dislike:-1,save:1.25,dwell:.25,skip:-.35}[type]||0;
+ adjust(state.topicWeights,item.topic,2*mult);adjust(state.sourceWeights,item.source,1.2*mult);
+ (item.tags||[]).forEach(t=>adjust(state.tagWeights,t,1*mult));
+ state.signals.push({t:Date.now(),type,topic:item.topic,source:item.source,tags:item.tags||[]});
+ if(state.signals.length>150)state.signals=state.signals.slice(-150);save();
 }
-function persist(){localStorage.setItem("elie_learning_os_v1",JSON.stringify(state))}
-function dateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-function hash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
-function rng(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
-function shuffle(a,seed){a=[...a];const r=rng(seed);for(let i=a.length-1;i>0;i--){let j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-function toast(s){let t=document.getElementById("toast");t.textContent=s;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1400)}
-
-function weightedDaily(){
- const seed=hash(todayKey), r=rng(seed);
- let pool=BANK.map(x=>({...x}));
- if(state.settings.workWeight){
-   pool=pool.flatMap(x=>Array(TOPIC_WEIGHTS[x.topic]||1).fill(0).map(()=>x));
- }
- let chosen=[], ids=new Set();
- if(state.settings.repeatMisses && state.wrong.length){
-   const reviewIds=shuffle(state.wrong,seed^99).slice(0,2);
-   reviewIds.forEach(id=>{let x=BANK.find(c=>c.id===id);if(x&&!ids.has(x.id)){chosen.push(x);ids.add(x.id)}})
- }
- let candidates=shuffle(pool,seed^777);
- for(const x of candidates){
-   if(ids.has(x.id)) continue;
-   if(chosen.filter(c=>c.topic===x.topic).length>=2) continue;
-   chosen.push(x); ids.add(x.id);
-   if(chosen.length>=7) break;
- }
- if(state.settings.hardFirst) chosen.sort((a,b)=>(b.difficulty||1)-(a.difficulty||1));
- return chosen;
+function toast(s){let x=document.getElementById("toast");x.textContent=s;x.classList.add("on");setTimeout(()=>x.classList.remove("on"),1200)}
+function go(v){document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));document.getElementById(v).classList.add("on");document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("on",x.dataset.v===v));if(v==="saved")renderSaved();if(v==="profile")renderProfile();window.scrollTo(0,0)}
+function relativeDate(s){let d=Math.round((Date.now()-new Date(s).getTime())/86400000);if(!Number.isFinite(d))return "";return d<=0?"today":d===1?"1d ago":d+"d ago"}
+function storyHTML(x){
+ const fb=state.feedback[x.id]||"";
+ return `<article class="story" id="s-${safe(x.id)}">
+  <div class="source">${x.source} · ${x.topic}<span class="fresh">${relativeDate(x.published)}</span></div>
+  <h3>${esc(x.title)}</h3>
+  <div class="what">${esc(x.what)}</div>
+  <div class="why"><b>Why this matters to you</b><br>${esc(x.why)}</div>
+  <div class="lesson"><b>The lesson</b><br>${esc(x.lesson)}</div>
+  ${x.question?`<div class="drill"><div class="drillQ">${esc(x.question)}</div><div class="choices">${x.choices.map((c,i)=>`<button class="choice" onclick="quiz('${js(x.id)}',${i},this)">${esc(c)}</button>`).join("")}</div><div class="explain" id="e-${safe(x.id)}"></div></div>`:""}
+  <div class="actions"><button class="act ${fb==="like"?"liked":""}" onclick="feedback('${js(x.id)}','like',this)">👍</button><button class="act ${fb==="dislike"?"disliked":""}" onclick="feedback('${js(x.id)}','dislike',this)">👎</button><button class="act ${state.saved.includes(x.id)?"liked":""}" onclick="toggleSaved('${js(x.id)}',this)">☆</button><button class="act deep" onclick="openAI('${js(x.id)}')">AI ↗</button></div>
+ </article>`
 }
-
-let deck=[], idx=0, answered=false, sessionCorrect=0, sessionQuestions=0, sessionMode="today";
-function startToday(){deck=weightedDaily();idx=0;sessionCorrect=0;sessionQuestions=0;sessionMode="today";go("learn");renderCard()}
-function startTopic(topic){deck=shuffle(BANK.filter(x=>x.topic===topic),hash(todayKey+topic)).slice(0,7);idx=0;sessionCorrect=0;sessionQuestions=0;sessionMode=topic;go("learn");renderCard()}
-function startSingle(id){let x=BANK.find(c=>c.id===id);if(!x)return;deck=[x];idx=0;sessionCorrect=0;sessionQuestions=0;sessionMode="library";go("learn");renderCard()}
-
-function go(v){
- document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
- document.getElementById(v).classList.add("on");
- document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("on",x.dataset.v===v));
- if(v==="topics")renderTopics();
- if(v==="library")renderLibrary();
- if(v==="profile")renderProfile();
- if(v==="home")renderHome();
- window.scrollTo(0,0);
-}
-
-function renderHome(){
- document.getElementById("streakHome").textContent=state.streak;
- document.getElementById("xpHome").textContent=state.xp;
- document.getElementById("accuracyHome").textContent=state.answers?Math.round(state.correct/state.answers*100)+"%":"—";
- const completed=state.completed===todayKey;
- document.querySelector(".startBtn").textContent=completed?"Run another tailored session →":"Start today's 6-minute session →";
-}
-function renderCard(){
- answered=false;let x=deck[idx];if(!x){finish();return}
- state.seen[x.id]=(state.seen[x.id]||0)+1;persist();
- document.getElementById("progressTxt").textContent=sessionMode==="today"?"TODAY'S SESSION":sessionMode.toUpperCase();
- document.getElementById("bar").style.width=((idx)/deck.length*100)+"%";
- document.getElementById("cardCount").textContent=(idx+1)+" / "+deck.length;
- updateSave();
- const card=document.getElementById("lessonCard");card.classList.remove("done");
- if(x.kind==="scenario"){
-   sessionQuestions++;
-   card.innerHTML=`<div><div class="topic">${x.kicker} · ${x.topic}<span class="level">Level ${x.difficulty}</span></div><h2>${x.title}</h2><div class="body">${x.body}</div><div class="prompt"><b>Decision:</b> ${x.question}</div><div class="choices">${x.choices.map((c,i)=>`<button class="choice" onclick="answer(${i},this)">${c}</button>`).join("")}</div><div class="feedback" id="feedback"></div></div><div class="controls"><button class="primary" id="continueBtn" style="display:none" onclick="nextCard()">Continue →</button></div>`;
- }else{
-   card.innerHTML=`<div><div class="topic">${x.kicker} · ${x.topic}<span class="level">Level ${x.difficulty}</span></div><h2>${x.title}</h2><div class="body">${x.body}</div><div class="insight"><b>Why it matters</b><br>${x.insight}</div><div class="prompt"><b>Use it:</b> ${x.prompt}</div><div class="memory"><b>Memory hook:</b> ${x.memory}</div></div><div class="controls"><button class="ghost" onclick="skipCard()">Skip</button><button class="primary" onclick="learned()">Got it →</button></div>`;
- }
-}
-function learned(){state.xp+=5;persist();nextCard()}
-function skipCard(){nextCard()}
-function answer(i,el){
- if(answered)return;answered=true;let x=deck[idx],bs=[...document.querySelectorAll(".choice")];
- state.answers++;
- if(i===x.correct){bs[i].classList.add("correct");sessionCorrect++;state.correct++;state.xp+=12;state.wrong=state.wrong.filter(id=>id!==x.id)}
- else{el.classList.add("wrong");bs[x.correct].classList.add("correct");state.xp+=3;if(!state.wrong.includes(x.id))state.wrong.push(x.id)}
- persist();
- document.getElementById("feedback").innerHTML=(i===x.correct?"<b style='color:var(--lime)'>Good call.</b> ":"<b style='color:var(--red)'>Reconsider.</b> ")+x.explain;
- document.getElementById("continueBtn").style.display="block";
-}
-function nextCard(){if(idx<deck.length-1){idx++;renderCard();window.scrollTo(0,0)}else finish()}
-function finish(){
- document.getElementById("bar").style.width="100%";
- if(sessionMode==="today"){state.completed=todayKey;state.xp+=20;persist()}
- let pct=sessionQuestions?Math.round(sessionCorrect/sessionQuestions*100):100;
- let card=document.getElementById("lessonCard");card.classList.add("done");
- card.innerHTML=`<div><div class="overline">Session complete</div><h2>Good. Keep the edge.</h2><div class="scoreRing" style="--pct:${pct*3.6}deg" data-score="${sessionQuestions?pct+'%':'✓'}"></div><div class="body" style="font-size:15px">You trained ${deck.length} decisions and concepts. ${state.wrong.length?state.wrong.length+" scenario"+(state.wrong.length>1?"s":"")+" waiting for review.":"No misses waiting for review."}</div><div class="controls"><button class="ghost" onclick="go('library');libMode='review';renderLibrary()">Review</button><button class="primary" onclick="go('home')">Done</button></div></div>`;
- document.getElementById("saveBtn").textContent="";document.getElementById("cardCount").textContent="";
-}
-function toggleSave(){let x=deck[idx];if(!x)return;let p=state.saved.indexOf(x.id);if(p>=0){state.saved.splice(p,1);toast("Removed from library")}else{state.saved.push(x.id);toast("Saved to library")}persist();updateSave()}
-function updateSave(){let x=deck[idx];let b=document.getElementById("saveBtn");if(!x)return;let on=state.saved.includes(x.id);b.textContent=on?"★ Saved":"☆ Save";b.classList.toggle("on",on)}
-
-function mastery(topic){
- const xs=BANK.filter(x=>x.topic===topic);let seen=xs.filter(x=>state.seen[x.id]).length;
- return Math.min(99,Math.round(seen/xs.length*70 + (seen?15:0)));
-}
-function renderTopics(){
- const counts={};BANK.forEach(x=>counts[x.topic]=(counts[x.topic]||0)+1);
- document.getElementById("topicList").innerHTML=Object.keys(counts).sort((a,b)=>(TOPIC_WEIGHTS[b]||1)-(TOPIC_WEIGHTS[a]||1)).map(t=>{
-   let m=META[t]||{icon:"•",desc:""};
-   return `<div class="topicRow" onclick="startTopic('${t.replace(/'/g,"\\'")}')"><div class="topicIco">${m.icon}</div><div><b>${t}</b><small>${m.desc} · ${counts[t]} cards</small></div><div class="mastery">${mastery(t)}%</div></div>`
- }).join("");
-}
-
-let libMode="saved";
-function renderLibrary(btn){
- if(btn){document.querySelectorAll(".libTab").forEach(x=>x.classList.remove("on"));btn.classList.add("on")}
- let ids=libMode==="saved"?state.saved:libMode==="review"?state.wrong:BANK.map(x=>x.id);
- let xs=ids.map(id=>BANK.find(x=>x.id===id)).filter(Boolean);
- document.getElementById("savedList").innerHTML=xs.length?xs.map(x=>`<div class="savedCard" onclick="startSingle('${x.id}')"><div class="st">${x.topic} · ${x.kind==="scenario"?"Decision drill":"Concept"}</div><b>${x.title}</b><p>${x.body.slice(0,145)}${x.body.length>145?"…":""}</p></div>`).join(""):`<div class="profileBox"><h3>${libMode==="review"?"No misses waiting":"Nothing here yet"}</h3><p style="color:var(--muted);font-size:13px;margin:0">${libMode==="review"?"Missed scenarios will appear here automatically.":"Save useful cards during a session and they will stay here."}</p></div>`;
-}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function js(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'")}
+function safe(s){return String(s).replace(/[^a-zA-Z0-9_-]/g,"_")}
+function render(){document.getElementById("feed").innerHTML=feed.map(storyHTML).join("");feed.forEach(x=>viewStart[x.id]=Date.now());document.getElementById("streak").textContent=state.streak;document.getElementById("likes").textContent=Object.values(state.feedback).filter(x=>x==="like").length;document.getElementById("interactions").textContent=state.signals.length}
+function feedback(id,type,btn){let x=feed.find(a=>a.id===id)||FALLBACK.find(a=>a.id===id);if(!x)return;let prev=state.feedback[id];if(prev===type){delete state.feedback[id];signal(x,type==="like"?"skip":"dwell");btn.classList.remove("liked","disliked");save();return}state.feedback[id]=type;signal(x,type);save();render();toast(type==="like"?"More like this":"I'll reduce this pattern")}
+function toggleSaved(id){let x=feed.find(a=>a.id===id)||FALLBACK.find(a=>a.id===id);let p=state.saved.indexOf(id);if(p>=0){state.saved.splice(p,1);toast("Removed")}else{state.saved.push(id);signal(x,"save");toast("Saved")}save();render()}
+function quiz(id,i,el){let x=feed.find(a=>a.id===id)||FALLBACK.find(a=>a.id===id);if(!x)return;let wrap=el.parentElement;[...wrap.children].forEach((b,k)=>{b.disabled=true;if(k===x.correct)b.classList.add("good")});if(i!==x.correct){el.classList.add("bad");state.quizMisses[id]=(state.quizMisses[id]||0)+1}else state.quizMisses[id]=Math.max(0,(state.quizMisses[id]||0)-1);save();document.getElementById("e-"+safe(id)).textContent=x.explain}
+function renderSaved(){let xs=state.saved.map(id=>feed.find(x=>x.id===id)||FALLBACK.find(x=>x.id===id)).filter(Boolean);document.getElementById("savedFeed").innerHTML=xs.length?xs.map(storyHTML).join(""):'<div class="empty">Save stories that are worth retaining. They will stay here.</div>'}
 function renderProfile(){
- document.getElementById("pXP").textContent=state.xp;document.getElementById("pStreak").textContent=state.streak;document.getElementById("pSaved").textContent=state.saved.length;
- document.getElementById("hardToggle").classList.toggle("on",state.settings.hardFirst);
- document.getElementById("reviewToggle").classList.toggle("on",state.settings.repeatMisses);
- document.getElementById("workToggle").classList.toggle("on",state.settings.workWeight);
+ let entries=Object.entries(state.topicWeights).sort((a,b)=>b[1]-a[1]),max=Math.max(1,...entries.map(x=>x[1]));
+ document.getElementById("weights").innerHTML=entries.map(([k,v])=>`<div class="weight"><span>${esc(k)}</span><div class="wbar"><i style="width:${Math.max(4,v/max*100)}%"></i></div><b>${v.toFixed(1)}</b></div>`).join("");
+ document.getElementById("aiState").textContent=document.getElementById("liveStatus").classList.contains("live")?"Connected. Live news is being transformed server-side by AI.":"Curated fallback active. Deploy the Vercel backend and set OPENAI_API_KEY to activate live AI.";
 }
-function toggleSetting(k,el){state.settings[k]=!state.settings[k];el.classList.toggle("on",state.settings[k]);persist();toast(state.settings[k]?"Enabled":"Disabled")}
-let deferredPrompt=null;
-window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;document.getElementById("installBtn").style.display="block"});
-async function installApp(){if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;document.getElementById("installBtn").style.display="none"}
-if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
-renderHome();
-</script>
-</body>
-</html>
+async function loadFeed(force=false){
+ document.getElementById("feedMeta").textContent="finding today's highest-signal stories…";
+ try{
+   let r=await fetch("/api/feed",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({profile:compactProfile(),force})});
+   if(!r.ok)throw new Error("API");
+   let data=await r.json();if(!data.items?.length)throw new Error("empty");
+   feed=data.items;document.getElementById("liveStatus").textContent="LIVE AI";document.getElementById("liveStatus").classList.add("live");document.getElementById("feedMeta").textContent=(data.candidateCount||"")+" stories scanned · AI ranked";render();
+ }catch(e){
+   feed=FALLBACK;document.getElementById("liveStatus").textContent="CURATED";document.getElementById("liveStatus").classList.remove("live");document.getElementById("feedMeta").textContent="curated fallback · live AI not connected";render();
+ }
+}
+function openAI(id){activeAI=feed.find(x=>x.id===id)||FALLBACK.find(x=>x.id===id);if(!activeAI)return;document.getElementById("aiTitle").textContent=activeAI.title;document.getElementById("aiBody").textContent="Choose how you want to interrogate this story.";document.getElementById("aiPanel").classList.add("on")}
+function closeAI(){document.getElementById("aiPanel").classList.remove("on")}
+async function runAI(mode){
+ if(!activeAI)return;document.getElementById("aiLoad").style.display="block";document.getElementById("aiBody").textContent="";
+ try{let r=await fetch("/api/deepen",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({item:activeAI,mode,profile:compactProfile()})});if(!r.ok)throw 0;let d=await r.json();document.getElementById("aiBody").textContent=d.text||"No response."}
+ catch(e){document.getElementById("aiBody").textContent=mode==="challenge"?"Challenge: what evidence would make the opposite interpretation more likely? Identify one metric you would demand before acting on this story.":mode==="implication"?activeAI.why:activeAI.lesson}
+ finally{document.getElementById("aiLoad").style.display="none"}
+}
+document.addEventListener("visibilitychange",()=>{if(document.hidden){feed.forEach(x=>{let ms=Date.now()-(viewStart[x.id]||Date.now());if(ms>20000&&!state.signals.slice(-8).some(s=>s.topic===x.topic&&s.type==="dwell"))signal(x,"dwell")})}})
+if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));
+loadFeed();
+</script></body></html>
