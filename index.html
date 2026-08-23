@@ -34,29 +34,111 @@
 <div class="box"><h3>Interest model</h3><div id="weights" class="weights"></div></div>
 <div class="box"><h3>Investment / research threads</h3><div id="watch" class="watch"></div><div class="add"><input id="watchInput" placeholder="Add Nvidia, gold, Taiwan…"><button onclick="addWatch()">+</button></div></div>
 <div class="box"><h3>How it improves itself</h3><div class="note">Likes, dislikes, saves, reading time, fast skips, article opens and interactive choices all change topic, source, entity and tag affinity. Previously seen stories are sent back to the ranking engine and strongly suppressed. Part of every feed is reserved for unfamiliar high-value material so the app does not become an echo chamber.</div></div>
-<div class="box"><h3>No more manual refresh</h3><div class="note">The last good feed is cached on your phone and opens instantly. If it is older than two hours, the app refreshes quietly in the background. Opening the app no longer means waiting for AI every time.</div></div></section>
+<div class="box"><h3>No more manual refresh</h3><div class="note">The last good feed is cached on your phone and opens instantly. If it is older than two hours, the app refreshes quietly in the background.</div></div></section>
 </div>
 <nav class="bottom"><button class="nav on" data-v="today" onclick="go('today')"><span>⌂</span>Feed</button><button class="nav" data-v="saved" onclick="go('saved')"><span>☆</span>Saved</button><button class="nav" data-v="model" onclick="go('model')"><span>◐</span>Model</button></nav>
 <div id="sheetWrap" class="sheetWrap" onclick="if(event.target===this)closeSheet()"><div class="sheet"><div class="sheetHead"><div class="over">AI rabbit hole</div><button onclick="closeSheet()">Close</button></div><h3 id="sheetTitle"></h3><div id="sheetBody" class="aiText"></div><div class="aiBtns"><button onclick="askAI('deeper')">Go deeper</button><button onclick="askAI('counter')">Other side</button><button onclick="askAI('investment')">Investment angle</button><button onclick="askAI('context')">Context</button></div></div></div>
-<div id="toast" class="toast"></div>
 <script>
-const FALLBACK=[{"id": "fallback-investing", "topic": "Investments", "source": "LearningOS", "published": "2026-08-23", "title": "Track thesis variables, not only prices", "url": "", "format": "thesis", "what": "Your standing research threads now include S&P 500, silver, uranium, Nvidia and SpaceX. The feed treats upcoming earnings, regulation, commodity supply, launch economics and macro changes as catalysts worth surfacing.", "why": "A watchlist becomes useful when it notices what could change your thesis before the price forces you to notice.", "lesson": "For Nvidia, useful variables can include hyperscaler capex, inference economics and China restrictions. For uranium, they can include reactor restarts, contracting, conversion and enrichment constraints.", "novelty": "This version makes investments a first-class feed category instead of an occasional technology tangent.", "prompt": "Which variable would make you change your mind before the market does?", "options": [], "reveal": "", "tags": ["sp500", "silver", "uranium", "nvidia", "spacex", "portfolio"], "entities": ["S&P 500", "Silver", "Uranium", "Nvidia", "SpaceX"]}, {"id": "fallback-geopolitics", "topic": "Geopolitics", "source": "LearningOS", "published": "2026-08-23", "title": "Separate geopolitical drama from geopolitical consequence", "url": "", "format": "counterpoint", "what": "Israel, Iran, US policy and internal Israeli politics can matter to markets, technology, regulation and your operating environment even when the headline itself is not about business.", "why": "The feed now includes these stories when they change incentives, capabilities or second-order outcomes, not simply because they are loud.", "lesson": "A useful geopolitical brief separates event, capability, intent and consequence. That keeps rhetoric from automatically becoming analysis.", "novelty": "Political and geopolitical coverage is now broad enough to be useful even when there is no direct robotics angle.", "prompt": "Which deserves more weight when interpreting a geopolitical headline?", "options": ["Rhetoric", "Changed capability", "Social media reaction"], "reveal": "Changed capability is usually the harder signal because rhetoric can move faster than underlying constraints.", "tags": ["israel", "iran", "us", "politics", "geopolitics"], "entities": ["Israel", "Iran", "United States"]}],TOPICS=["All","Investments","Geopolitics","Israel","AI","Robotics","ADAS","Markets","Science","Politics","Surprise"],DEF={"Investments":6,"Geopolitics":4.3,"Israel":4.2,"AI":4,"Robotics":4.8,"ADAS":4.3,"Markets":4,"Science":2.7,"Politics":3,"Surprise":2};
-let S=JSON.parse(localStorage.getItem("learningos_v3")||"{}");S.topic??={...DEF};S.source??={Reuters:2.5,Globes:2.4,Ynet:2.1,TechCrunch:1.8};S.tags??={};S.entity??={};S.saved??=[];S.feedback??={};S.seen??=[];S.seenTags??={};S.signals??=[];S.watch??=["S&P 500","Silver","Uranium","Nvidia","SpaceX"];S.cache??=null;
-let feed=[],filter="All",active=null,timers={},obs=null;const save=()=>localStorage.setItem("learningos_v3",JSON.stringify(S)),adj=(o,k,d)=>o[k]=Math.max(-8,Math.min(18,(o[k]||0)+d)),top=(o,n)=>Object.fromEntries(Object.entries(o).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,n));
-function signal(x,t){let m={like:2.4,dislike:-2.8,save:3,article:1.6,dwell:.35,skip:-.45,interact:1.1}[t]||0;adj(S.topic,x.topic,m);adj(S.source,x.source,m*.55);(x.tags||[]).forEach(z=>adj(S.tags,z,m*.5));(x.entities||[]).forEach(z=>adj(S.entity,z,m*.7));S.signals.push({t:Date.now(),type:t,topic:x.topic,source:x.source,tags:(x.tags||[]).slice(0,6)});S.signals=S.signals.slice(-250);save()}
-function profile(){return{topics:S.topic,sources:S.source,tags:top(S.tags,35),entities:top(S.entity,35),watch:S.watch,recentSignals:S.signals.slice(-60),seenTitles:S.seen.slice(-160).map(x=>x.title),seenIds:S.seen.slice(-300).map(x=>x.id)}}
-const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])),js=s=>String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'"),safe=s=>String(s).replace(/[^a-zA-Z0-9_-]/g,"_");
-function age(s){let d=Math.floor((Date.now()-new Date(s).getTime())/86400000);return!Number.isFinite(d)?"":d<1?"today":d===1?"1d ago":d+"d ago"}function ico(t){return({Investments:"↗",Markets:"∿",Geopolitics:"◎",Israel:"✡",AI:"✦",Robotics:"◉",ADAS:"◇",Science:"⌁",Politics:"◐",Surprise:"?"})[t]||"•"}function newish(x){let a=x.tags||[];return a.length&&a.filter(t=>(S.seenTags[t]||0)===0).length>=Math.ceil(a.length*.6)}
-function inter(x){if(!x.prompt)return"";let opts=(x.options||[]).map((o,i)=>`<button class="opt" onclick="pick('${js(x.id)}',${i},this)">${esc(o)}</button>`).join("");return`<div class="interact"><div class="it">${x.format==="prediction"?"Make a prediction":x.format==="counterpoint"?"Pressure test":x.format==="ranking"?"Rank the drivers":x.format==="thesis"?"Thesis check":"Think about it"}</div><div class="prompt">${esc(x.prompt)}</div>${opts?`<div class="opts">${opts}</div><div class="reveal" id="r-${safe(x.id)}"></div>`:""}</div>`}
-function card(x){let f=S.feedback[x.id],nw=newish(x),img=x.image?`<img loading="lazy" src="${esc(x.image)}" onerror="this.parentElement.innerHTML='<div class=&quot;vf&quot;>${ico(x.topic)}</div>'">`:`<div class="vf">${ico(x.topic)}</div>`;return`<article class="card" data-id="${esc(x.id)}"><div class="visual">${img}<div class="badge ${nw?"new":""}">${nw?"✦ NEW TO YOU":esc(x.topic)}</div></div><div class="content"><div class="source">${esc(x.source)} · ${esc(x.topic)}<span class="age">${age(x.published)}</span></div><h3>${esc(x.title)}</h3><div class="what">${esc(x.what)}</div><div class="block why"><b>Why it matters</b><br>${esc(x.why)}</div><div class="block lesson"><b>The useful idea</b><br>${esc(x.lesson)}</div>${x.novelty?`<div class="novel"><b>Why this is different:</b> ${esc(x.novelty)}</div>`:""}${inter(x)}<div class="actions"><button class="act ${f==="like"?"up":""}" onclick="fb('${js(x.id)}','like')">👍</button><button class="act ${f==="dislike"?"down":""}" onclick="fb('${js(x.id)}','dislike')">👎</button><button class="act ${S.saved.includes(x.id)?"up":""}" onclick="sv('${js(x.id)}')">☆</button><button class="act" onclick="openAI('${js(x.id)}')">AI ↗</button>${x.url?`<a class="article" href="${esc(x.url)}" target="_blank" onclick="article('${js(x.id)}')">Read article ↗</a>`:"<span></span>"}</div></div></article>`}
-const find=id=>feed.find(x=>x.id===id)||FALLBACK.find(x=>x.id===id),visible=()=>filter==="All"?feed:feed.filter(x=>x.topic===filter);
-function render(){let x=visible();document.getElementById("feed").innerHTML=x.length?x.map(card).join(""):'<div class="empty">No items in this filter yet.</div>';document.getElementById("sig").textContent=S.signals.length;document.getElementById("seen").textContent=S.seen.length;document.getElementById("novel").textContent=x.filter(newish).length;observe()}function filters(){document.getElementById("filters").innerHTML=TOPICS.map(t=>`<button class="filter ${t===filter?"on":""}" onclick="setF('${t}')">${t}</button>`).join("")}function setF(t){filter=t;filters();render()}
-function fb(id,t){let x=find(id);if(!x)return;S.feedback[id]===t?delete S.feedback[id]:(S.feedback[id]=t,signal(x,t));save();render()}function sv(id){let x=find(id),p=S.saved.indexOf(id);p>=0?S.saved.splice(p,1):(S.saved.push(id),signal(x,"save"));save();render()}function article(id){let x=find(id);if(x)signal(x,"article")}function pick(id,i,e){let x=find(id);if(!x)return;e.parentElement.querySelectorAll(".opt").forEach(b=>b.classList.remove("sel"));e.classList.add("sel");signal(x,"interact");let r=document.getElementById("r-"+safe(id));if(r)r.textContent=x.reveal||"Good. The point is to make your view explicit before reading more."}
-function observe(){if(obs)obs.disconnect();obs=new IntersectionObserver(es=>es.forEach(e=>{let id=e.target.dataset.id,x=find(id);if(e.isIntersecting){timers[id]=Date.now();if(x&&!S.seen.some(s=>s.id===id)){S.seen.push({id,title:x.title,t:Date.now()});S.seen=S.seen.slice(-500);(x.tags||[]).forEach(t=>S.seenTags[t]=(S.seenTags[t]||0)+1);save()}}else if(timers[id]&&x){let ms=Date.now()-timers[id];ms>18000?signal(x,"dwell"):ms<2500&&signal(x,"skip");delete timers[id]}}),{threshold:.55});document.querySelectorAll(".card").forEach(c=>obs.observe(c))}
-async function load(force=false){let ttl=7200000,c=S.cache;if(c?.items?.length&&!force){feed=c.items;document.getElementById("status").textContent="CACHED";document.getElementById("meta").textContent=feed.length+" items · checking quietly for updates";render();if(Date.now()-c.time<ttl)return;setTimeout(()=>fresh(false),250)}else await fresh(true)}
-async function fresh(show){if(show)document.getElementById("feed").innerHTML='<div class="loading">Building a richer feed from today’s signals…<div class="loader"><i></i></div></div>';try{let r=await fetch("/api/feed",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({profile:profile()})});if(!r.ok)throw 0;let d=await r.json();if(!d.items?.length)throw 0;feed=d.items;S.cache={time:Date.now(),items:feed};save();document.getElementById("status").textContent="LIVE";document.getElementById("status").classList.add("on");document.getElementById("meta").textContent=`${d.candidateCount||"many"} stories scanned · ${feed.length} selected`;render()}catch(e){feed=S.cache?.items?.length?S.cache.items:FALLBACK;document.getElementById("status").textContent="OFFLINE";document.getElementById("meta").textContent="using your last good feed";render()}}
-function go(v){document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));document.getElementById(v).classList.add("on");document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("on",x.dataset.v===v));if(v==="saved")document.getElementById("savedFeed").innerHTML=S.saved.map(find).filter(Boolean).map(card).join("")||'<div class="empty">Nothing saved yet.</div>';if(v==="model")model();window.scrollTo(0,0)}
-function model(){let e=Object.entries(S.topic).sort((a,b)=>b[1]-a[1]),m=Math.max(...e.map(x=>x[1]),1);document.getElementById("weights").innerHTML=e.map(([k,v])=>`<div class="weight"><span>${k}</span><div class="bar"><i style="width:${Math.max(3,v/m*100)}%"></i></div><b>${v.toFixed(1)}</b></div>`).join("");document.getElementById("watch").innerHTML=S.watch.map((w,i)=>`<span class="wchip">${esc(w)} <b onclick="rmWatch(${i})">×</b></span>`).join("")}function addWatch(){let i=document.getElementById("watchInput"),v=i.value.trim();if(v&&!S.watch.includes(v)){S.watch.push(v);S.cache=null;i.value="";save();model()}}function rmWatch(i){S.watch.splice(i,1);save();model()}
-function openAI(id){active=find(id);if(!active)return;document.getElementById("sheetTitle").textContent=active.title;document.getElementById("sheetBody").textContent="Choose a direction. The tutor will not repeat the card.";document.getElementById("sheetWrap").classList.add("on");signal(active,"interact")}function closeSheet(){document.getElementById("sheetWrap").classList.remove("on")}async function askAI(mode){if(!active)return;let b=document.getElementById("sheetBody");b.textContent="Thinking…";try{let r=await fetch("/api/deepen",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({item:active,mode,profile:profile()})});let d=await r.json();b.textContent=d.text||"Unavailable"}catch(e){b.textContent="AI tutor unavailable right now."}}
-filters();load();document.addEventListener("visibilitychange",()=>{if(!document.hidden)load(false)});if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js"));
-</script></body></html>
+const FALLBACK=[];
+const TOPICS=["All","Investments","Geopolitics","Israel","AI","Robotics","ADAS","Markets","Science","Politics","Surprise"];
+const DEF={"Investments":6,"Geopolitics":4.3,"Israel":4.2,"AI":4,"Robotics":4.8,"ADAS":4.3,"Markets":4,"Science":2.7,"Politics":3,"Surprise":2};
+
+let S={};
+try{
+  const rawState=localStorage.getItem("learningos_v3");
+  S=rawState?JSON.parse(rawState):{};
+  if(!S || typeof S!=="object" || Array.isArray(S)) S={};
+}catch(err){
+  try{localStorage.removeItem("learningos_v3")}catch(_){}
+  S={};
+}
+if(!S.topic || typeof S.topic!=="object" || Array.isArray(S.topic)) S.topic={...DEF};
+if(!S.source || typeof S.source!=="object" || Array.isArray(S.source)) S.source={Reuters:2.5,Globes:2.4,Ynet:2.1,TechCrunch:1.8};
+if(!S.tags || typeof S.tags!=="object" || Array.isArray(S.tags)) S.tags={};
+if(!S.entity || typeof S.entity!=="object" || Array.isArray(S.entity)) S.entity={};
+if(!Array.isArray(S.saved)) S.saved=[];
+if(!S.feedback || typeof S.feedback!=="object" || Array.isArray(S.feedback)) S.feedback={};
+if(!Array.isArray(S.seen)) S.seen=[];
+if(!S.seenTags || typeof S.seenTags!=="object" || Array.isArray(S.seenTags)) S.seenTags={};
+if(!Array.isArray(S.signals)) S.signals=[];
+if(!Array.isArray(S.watch)) S.watch=["S&P 500","Silver","Uranium","Nvidia","SpaceX"];
+if(!S.cache || typeof S.cache!=="object") S.cache=null;
+
+let feed=[],filter="All",active=null;
+const save=()=>localStorage.setItem("learningos_v3",JSON.stringify(S));
+const esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]);
+const find=id=>feed.find(x=>x.id===id);
+
+function filters(){
+  document.getElementById("filters").innerHTML=TOPICS.map(t=>`<button class="filter ${t===filter?"on":""}" onclick="setF('${t}')">${t}</button>`).join("");
+}
+function setF(t){filter=t;filters();render()}
+function card(x){
+  return `<article class="card"><div class="content"><div class="source">${esc(x.source||"")} · ${esc(x.topic||"")}</div><h3>${esc(x.title||"")}</h3><div class="what">${esc(x.what||"")}</div><div class="block why"><b>Why it matters</b><br>${esc(x.why||"")}</div><div class="block lesson"><b>The useful idea</b><br>${esc(x.lesson||"")}</div>${x.url?`<div class="actions"><a class="article" href="${esc(x.url)}" target="_blank">Read article ↗</a></div>`:""}</div></article>`;
+}
+function render(){
+  const shown=filter==="All"?feed:feed.filter(x=>x.topic===filter);
+  document.getElementById("feed").innerHTML=shown.length?shown.map(card).join(""):'<div class="empty">No stories yet.</div>';
+  document.getElementById("sig").textContent=S.signals.length;
+  document.getElementById("seen").textContent=S.seen.length;
+  document.getElementById("novel").textContent=shown.length;
+}
+async function fresh(){
+  document.getElementById("feed").innerHTML='<div class="loading">Building your feed…<div class="loader"><i></i></div></div>';
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),55000);
+  try{
+    const r=await fetch("/api/feed",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({profile:{topics:S.topic,sources:S.source,watch:S.watch,seenTitles:S.seen.slice(-100).map(x=>x.title)}}),signal:controller.signal});
+    clearTimeout(timeout);
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const d=await r.json();
+    if(!Array.isArray(d.items)||!d.items.length)throw new Error("No feed items");
+    feed=d.items;
+    S.cache={time:Date.now(),items:feed};
+    save();
+    document.getElementById("status").textContent="LIVE";
+    document.getElementById("status").classList.add("on");
+    document.getElementById("meta").textContent=`${d.candidateCount||"many"} stories scanned · ${feed.length} selected`;
+    render();
+  }catch(err){
+    clearTimeout(timeout);
+    if(S.cache?.items?.length){
+      feed=S.cache.items;
+      document.getElementById("status").textContent="CACHED";
+      document.getElementById("meta").textContent="showing last good feed";
+      render();
+    }else{
+      document.getElementById("status").textContent="ERROR";
+      document.getElementById("meta").textContent="feed could not load";
+      document.getElementById("feed").innerHTML='<div class="empty">Feed failed to load. Check Vercel logs.</div>';
+    }
+  }
+}
+async function boot(){
+  filters();
+  if(S.cache?.items?.length){
+    feed=S.cache.items;
+    document.getElementById("status").textContent="CACHED";
+    document.getElementById("meta").textContent="checking quietly for updates";
+    render();
+  }
+  await fresh();
+}
+function go(v){
+  document.querySelectorAll(".view").forEach(x=>x.classList.remove("on"));
+  document.getElementById(v).classList.add("on");
+  document.querySelectorAll(".nav").forEach(x=>x.classList.toggle("on",x.dataset.v===v));
+}
+function addWatch(){}
+function rmWatch(){}
+function openAI(){}
+function closeSheet(){}
+function askAI(){}
+
+boot();
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
