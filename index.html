@@ -1749,36 +1749,30 @@ function renderModel() {
 }
 
 
-function remember(items) {
+function markViewed(item) {
+  if (!item?.id) return;
 
-  const map =
-    new Map(
-      S.seen.map(
-        x => [
-          String(x.id),
-          x
-        ]
-      )
-    );
+  const id = String(item.id);
 
-  for (
-    const x of items
-  ) {
+  const existing = S.seen.find(
+    x => String(x.id) === id
+  );
 
-    map.set(
-      String(x.id),
-      {
-        id:x.id,
-        title:x.title,
-        time:Date.now()
-      }
-    );
+  if (existing) {
+    existing.lastViewed = Date.now();
+    existing.views = (existing.views || 0) + 1;
+  } else {
+    S.seen.push({
+      id: item.id,
+      title: item.title,
+      firstViewed: Date.now(),
+      lastViewed: Date.now(),
+      views: 1,
+      opened: false
+    });
   }
 
-  S.seen =
-    [...map.values()]
-      .slice(-220);
-
+  S.seen = S.seen.slice(-250);
   save();
 }
 
