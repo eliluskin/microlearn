@@ -34,7 +34,7 @@ export default async function handler(req,res){
  try{
 let p=req.body?.profile||{};
 let requestedBatch=Number(req.body?.batchSize);
-let batchSize=requestedBatch ? Math.max(18,Math.min(40,requestedBatch)) : 30;
+let batchSize=requestedBatch ? Math.max(6,Math.min(10,requestedBatch)) : 10;
 
 let b=await Promise.all(Q.map(rss));
 let c=dedupe(b.flat())
