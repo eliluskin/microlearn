@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily MicroLearn</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#07101c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#07101c;--panel:#101b2d;--panel2:#17253e;--text:#f5f7fb;--muted:#9eabc0;--a:#7c5cff;--b:#32d1b2;--bad:#ff6b6b;--gold:#ffd166;--border:rgba(255,255,255,.08)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 15% 0%,rgba(124,92,255,.18),transparent 30%),radial-gradient(circle at 100% 25%,rgba(50,209,178,.1),transparent 25%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}
+.app{max-width:760px;margin:auto;padding:12px 12px 32px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px}.brand{font-size:23px;font-weight:850;letter-spacing:-.04em}.brand span{color:var(--b)}.stats{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.pill{font-size:12px;color:var(--muted);padding:7px 10px;border:1px solid var(--border);background:rgba(255,255,255,.045);border-radius:999px}
+.date{color:var(--muted);font-size:12px;margin:7px 1px 9px}.tabs{display:flex;gap:7px;overflow:auto;scrollbar-width:none;padding-bottom:9px}.tabs::-webkit-scrollbar{display:none}.tab{white-space:nowrap;padding:8px 11px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--muted);font-size:12px}.tab.active{background:rgba(124,92,255,.17);color:#fff;border-color:rgba(124,92,255,.5)}
+.bar{height:7px;background:rgba(255,255,255,.07);border-radius:999px;overflow:hidden;margin-bottom:13px}.fill{height:100%;background:linear-gradient(90deg,var(--a),var(--b));transition:.25s}
+.card{min-height:570px;border:1px solid var(--border);background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(255,255,255,.005)),var(--panel);border-radius:27px;padding:25px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 25px 70px rgba(0,0,0,.28)}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.15em;font-weight:800;color:var(--b)}h1{font-size:34px;line-height:1.06;letter-spacing:-.04em;margin:10px 0 17px}.body{font-size:18px;line-height:1.58;color:#e7edf7}.fact,.memory{margin-top:17px;padding:15px 16px;border-radius:17px;line-height:1.45}.fact{background:var(--panel2);border:1px solid var(--border)}.memory{background:rgba(124,92,255,.08);border-left:3px solid var(--a)}
+.choices{display:grid;gap:10px;margin-top:20px}.choice{text-align:left;padding:15px;border-radius:16px;border:1px solid var(--border);background:rgba(255,255,255,.055);color:inherit;font:inherit}.choice.correct{border-color:var(--b);background:rgba(50,209,178,.12)}.choice.wrong{border-color:var(--bad);background:rgba(255,107,107,.1)}.feedback{min-height:31px;color:var(--muted);font-size:14px;margin-top:11px;line-height:1.4}
+.controls{display:flex;gap:9px;margin-top:22px}.primary,.secondary{flex:1;padding:14px 16px;border-radius:15px;font-weight:800;color:#fff;font:inherit;border:0}.primary{background:linear-gradient(90deg,var(--a),#9b7cff)}.secondary{background:rgba(255,255,255,.055);border:1px solid var(--border)}
+.footer{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;padding:11px 2px}.save{background:none;border:0;color:var(--muted);font:inherit}.save.on{color:var(--gold)}.done{text-align:center;justify-content:center;align-items:center}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:100%;margin:22px 0}.stat{padding:15px;border:1px solid var(--border);background:rgba(255,255,255,.05);border-radius:17px}.stat b{font-size:24px;display:block}.stat span{font-size:12px;color:var(--muted)}.small{font-size:13px;color:var(--muted);line-height:1.5}.hidden{display:none!important}
+@media(max-width:560px){.card{min-height:72vh;padding:21px;border-radius:23px}h1{font-size:30px}.body{font-size:17px}.grid{grid-template-columns:1fr 1fr}.grid .stat:last-child{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="brand">Daily<span>Learn</span></div>
+    <div class="stats"><div class="pill">🔥 <span id="streak">1</span></div><div class="pill">⭐ <span id="xp">0</span> XP</div></div>
+  </div>
+  <div class="date" id="dateLabel"></div>
+  <button id="installBtn" class="tab" style="display:none;margin-bottom:9px" onclick="installApp()">Install app</button>
+  <div class="tabs">
+    <button class="tab active" data-mode="today" onclick="switchMode('today')">Today</button>
+    <button class="tab" data-mode="review" onclick="switchMode('review')">Review</button>
+    <button class="tab" data-mode="saved" onclick="switchMode('saved')">Saved</button>
+  </div>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <main class="card" id="card"></main>
+  <div class="footer"><span id="counter"></span><button class="save" id="saveBtn" onclick="toggleSave()">☆ Save</button></div>
+</div>
+
+<script>
+const BANK = [{"type": "learn", "topic": "Strategy", "title": "Second-order thinking", "body": "Strong decisions look beyond the immediate effect. Ask not only “what happens next?” but also “what happens because of that?”", "fact": "A price cut may boost volume first, then trigger retaliation, lower margins, and reset customer expectations.", "memory": "Consequence of the consequence."}, {"type": "learn", "topic": "Strategy", "title": "Reversible vs irreversible decisions", "body": "Some decisions are easy to undo. Others lock you in. Move fast on reversible choices and slow down when the downside is hard to reverse.", "fact": "Treating every decision as equally important creates bureaucracy.", "memory": "Two-way door: move fast. One-way door: think harder."}, {"type": "learn", "topic": "Strategy", "title": "Opportunity cost", "body": "The real cost of a choice includes what you give up by not choosing the best alternative.", "fact": "A project can have positive ROI and still be a bad choice if another project has much higher ROI.", "memory": "Every yes is also a no."}, {"type": "learn", "topic": "Strategy", "title": "Base rates before stories", "body": "Before trusting a compelling narrative, ask what usually happens in comparable cases.", "fact": "Base rates help counter overconfidence caused by vivid company-specific stories.", "memory": "Start outside, then look inside."}, {"type": "learn", "topic": "Strategy", "title": "Local optimum", "body": "Improving one part of a system can make the whole system worse if that part is not the real bottleneck.", "fact": "Faster engineering does not help much if validation remains the constraint.", "memory": "Optimize the bottleneck, not the loudest team."}, {"type": "learn", "topic": "AI", "title": "Inference economics", "body": "Training gets attention, but many AI businesses live or die on the cost of running the model every time a user asks for output.", "fact": "A technically excellent model can be commercially unattractive if inference cost is too high at scale.", "memory": "Training is the build cost. Inference is the recurring bill."}, {"type": "learn", "topic": "AI", "title": "Context window is not memory", "body": "A larger context window lets a model read more at once, but it does not automatically mean the model has durable memory across sessions.", "fact": "Persistent memory requires a separate mechanism that stores and retrieves information.", "memory": "Context is what is visible now. Memory is what survives."}, {"type": "learn", "topic": "AI", "title": "Hallucination is not random", "body": "Language models predict plausible continuations. When evidence is weak, a fluent answer can still be wrong.", "fact": "Tools, retrieval, citations, and verification reduce this risk by grounding generation in external evidence.", "memory": "Fluency is not proof."}, {"type": "learn", "topic": "AI", "title": "Distillation", "body": "Knowledge distillation trains a smaller model to imitate a larger one, often preserving much of the capability at lower cost.", "fact": "It is one route to cheaper deployment on edge devices.", "memory": "Big teacher, smaller student."}, {"type": "learn", "topic": "AI", "title": "Embeddings", "body": "Embeddings convert text, images, or other data into numeric vectors where similar meanings tend to lie closer together.", "fact": "They are widely used for semantic search, recommendations, clustering, and retrieval.", "memory": "Meaning as coordinates."}, {"type": "learn", "topic": "Robotics", "title": "Torque density", "body": "Torque density is roughly how much rotational force an actuator can deliver relative to its size or mass.", "fact": "Higher torque density helps make lighter, more dynamic limbs, but can increase thermal and durability challenges.", "memory": "Small package, big force."}, {"type": "learn", "topic": "Robotics", "title": "Backdrivability", "body": "A backdrivable joint can be moved by external force without fighting a highly resistant transmission.", "fact": "Backdrivability can improve safety and force control, but may conflict with high reduction ratios or holding efficiency.", "memory": "Can the world move the joint back?"}, {"type": "learn", "topic": "Robotics", "title": "Series elastic actuation", "body": "A series elastic actuator places a compliant element, usually a spring, between motor and load.", "fact": "The spring can improve force sensing and shock tolerance, but adds control complexity.", "memory": "Spring between motor and world."}, {"type": "learn", "topic": "Robotics", "title": "Sim-to-real gap", "body": "Policies trained in simulation can fail in the real world because simulation never perfectly matches friction, latency, sensing noise, compliance, and contact dynamics.", "fact": "Domain randomization helps by varying simulation conditions during training.", "memory": "Reality always has extra noise."}, {"type": "learn", "topic": "Robotics", "title": "Degrees of freedom", "body": "A degree of freedom is an independent direction in which a mechanism can move.", "fact": "More degrees of freedom increase dexterity, but also control complexity, weight, cost, and failure modes.", "memory": "More motion, more complexity."}, {"type": "learn", "topic": "Psychology", "title": "Availability heuristic", "body": "People often estimate likelihood by how easily examples come to mind. Vivid events therefore feel more common than they really are.", "fact": "Recent failures and dramatic accidents can distort judgment even when the base rate says otherwise.", "memory": "Easy to remember does not mean likely."}, {"type": "learn", "topic": "Psychology", "title": "Loss aversion", "body": "People often feel the pain of losing something more strongly than the pleasure of gaining the same amount.", "fact": "This can make people reject rational bets or hold bad positions too long.", "memory": "Losses loom larger than gains."}, {"type": "learn", "topic": "Psychology", "title": "Sunk cost fallacy", "body": "Past costs that cannot be recovered should not determine whether you continue a project.", "fact": "The relevant question is whether the next dollar or hour is worth spending.", "memory": "Past spend is gone. Decide from today forward."}, {"type": "learn", "topic": "Psychology", "title": "Confirmation bias", "body": "People naturally seek and value evidence that supports what they already believe.", "fact": "A strong decision process deliberately searches for disconfirming evidence.", "memory": "Ask what would prove you wrong."}, {"type": "learn", "topic": "Psychology", "title": "Peak-end rule", "body": "People tend to remember an experience disproportionately by its most intense point and its ending.", "fact": "This helps explain why a good final interaction can strongly affect overall memory.", "memory": "Peak plus ending shapes memory."}, {"type": "learn", "topic": "Business", "title": "Gross margin is not cash", "body": "A business can have strong gross margins and still run out of money because cash flow includes operating expenses, working capital, capex, financing, and timing.", "fact": "Revenue booked today may arrive as cash much later.", "memory": "Profitability and liquidity are different."}, {"type": "learn", "topic": "Business", "title": "Working capital", "body": "Working capital is the money tied up in day-to-day operations, especially inventory, receivables, and payables.", "fact": "Fast growth can consume cash when customers pay slowly but suppliers must be paid quickly.", "memory": "Growth can eat cash."}, {"type": "learn", "topic": "Business", "title": "Contribution margin", "body": "Contribution margin is revenue minus the variable costs directly associated with serving that revenue.", "fact": "It helps show whether each additional unit sold contributes toward fixed costs and profit.", "memory": "What each extra sale contributes."}, {"type": "learn", "topic": "Business", "title": "Operating leverage", "body": "A business with high fixed costs and low variable costs can see profit grow very quickly once revenue passes break-even.", "fact": "The same structure hurts badly when revenue falls.", "memory": "Fixed costs amplify both upside and downside."}, {"type": "learn", "topic": "Business", "title": "CAC payback", "body": "Customer acquisition cost payback measures how long it takes gross profit from a customer to recover the cost of acquiring them.", "fact": "Long payback periods increase financing needs and risk.", "memory": "How long until marketing money comes back?"}, {"type": "learn", "topic": "History", "title": "The Suez Canal", "body": "Opened in 1869, the Suez Canal shortened the sea route between Europe and Asia by removing the need to sail around Africa.", "fact": "Its importance comes from concentrating trade into a strategic chokepoint.", "memory": "Shorter route, bigger leverage."}, {"type": "learn", "topic": "History", "title": "The printing press", "body": "Movable-type printing in Europe dramatically reduced the cost of reproducing text and accelerated the spread of ideas.", "fact": "Its effects reached religion, science, education, politics, and state administration.", "memory": "Cheaper copying changed society."}, {"type": "learn", "topic": "History", "title": "The Bretton Woods system", "body": "In 1944, Allied countries designed a postwar monetary system centered on fixed exchange rates tied to the US dollar, with the dollar convertible to gold.", "fact": "The system later broke down, but institutions created around it still shape global finance.", "memory": "Postwar order built around the dollar."}, {"type": "learn", "topic": "History", "title": "Containerization", "body": "Standardized shipping containers transformed global trade by making cargo transfer between ships, trucks, and trains far cheaper and faster.", "fact": "The innovation was not just the box, but standardization across the logistics system.", "memory": "Standard interfaces unlock scale."}, {"type": "learn", "topic": "History", "title": "The Green Revolution", "body": "High-yield crop varieties, irrigation, fertilizers, and modern farming methods sharply increased food production in many developing countries during the 20th century.", "fact": "It reduced famine risk in some regions but also created environmental and resource tradeoffs.", "memory": "More food through agricultural intensification."}, {"type": "learn", "topic": "Geopolitics", "title": "Chokepoints shape power", "body": "A chokepoint is a narrow route through which large flows of trade, energy, or military traffic must pass.", "fact": "Examples include Hormuz, Bab el-Mandeb, the Bosporus, Malacca, and Suez.", "memory": "Small geography can control large flows."}, {"type": "learn", "topic": "Geopolitics", "title": "Sea power and trade", "body": "Countries that depend on maritime trade care deeply about secure shipping lanes, ports, and naval access.", "fact": "This is why commercial geography often shapes military strategy.", "memory": "Trade routes become strategic routes."}, {"type": "learn", "topic": "Geopolitics", "title": "Strategic depth", "body": "Strategic depth is the physical or operational space a state has to absorb, delay, or maneuver against threats.", "fact": "Countries with little geographic depth may compensate through alliances, early warning, air power, or deterrence.", "memory": "Space buys options."}, {"type": "learn", "topic": "Geopolitics", "title": "Economic statecraft", "body": "States use trade, sanctions, technology controls, investment rules, and financial access as instruments of foreign policy.", "fact": "Economic interdependence can create both prosperity and leverage.", "memory": "Commerce can be power."}, {"type": "learn", "topic": "Geopolitics", "title": "Security dilemma", "body": "One country can increase its own security in ways that make another country feel less secure, triggering an arms race even if neither side initially wants conflict.", "fact": "Intentions are hard to observe, while capabilities are visible.", "memory": "My defense can look like your threat."}, {"type": "learn", "topic": "Communication", "title": "Specific beats persuasive", "body": "“We need to move faster” sounds urgent but leaves room for interpretation. A better instruction defines output, owner, deadline, and completion criteria.", "fact": "Specificity reduces coordination cost.", "memory": "Output + owner + deadline + done."}, {"type": "learn", "topic": "Communication", "title": "BLUF", "body": "BLUF means Bottom Line Up Front. Put the conclusion or ask first, then the supporting detail.", "fact": "It is especially useful for executives, operations, military communication, and time-sensitive decisions.", "memory": "Conclusion first."}, {"type": "learn", "topic": "Communication", "title": "Separate facts from interpretation", "body": "A clean update distinguishes what happened from what you think it means.", "fact": "This makes disagreement easier because people can challenge the interpretation without disputing the facts.", "memory": "Fact first, inference second."}, {"type": "learn", "topic": "Communication", "title": "Decision memo structure", "body": "A strong decision note often works best as: decision required, recommendation, key reasons, risks, and next action.", "fact": "Long background sections often obscure the actual choice.", "memory": "Decision before history."}, {"type": "learn", "topic": "Communication", "title": "Compression without ambiguity", "body": "Concise communication is useful only if it preserves the information needed to act.", "fact": "Deleting context that changes the decision is not concision, it is information loss.", "memory": "Shorter, not thinner."}, {"type": "learn", "topic": "Science", "title": "Bayes in one sentence", "body": "Bayesian reasoning updates an existing belief when new evidence arrives.", "fact": "Strong evidence should move your belief more than weak evidence, and prior probability still matters.", "memory": "Prior belief + new evidence = updated belief."}, {"type": "learn", "topic": "Science", "title": "Correlation is not causation", "body": "Two variables moving together does not prove that one causes the other.", "fact": "A third variable, reverse causality, or coincidence may explain the relationship.", "memory": "Together does not mean because."}, {"type": "learn", "topic": "Science", "title": "Regression to the mean", "body": "An unusually extreme result is often followed by a result closer to average, even without any intervention.", "fact": "This can make ineffective treatments or management actions look effective after a bad period.", "memory": "Extremes tend to normalize."}, {"type": "learn", "topic": "Science", "title": "Power law", "body": "In some systems, a small number of events account for a very large share of the outcome.", "fact": "Venture returns, city sizes, online attention, and network degree often show heavy-tailed patterns.", "memory": "A few outcomes dominate."}, {"type": "learn", "topic": "Science", "title": "Falsifiability", "body": "A useful scientific claim should make predictions that could in principle be shown false.", "fact": "If every possible outcome can be explained after the fact, the claim has little predictive power.", "memory": "What evidence would prove it wrong?"}, {"type": "quiz", "topic": "Strategy", "title": "Second-order check", "question": "Which response best shows second-order thinking?", "choices": ["React to the first visible effect only.", "Estimate the chain of consequences after the first effect.", "Delay every decision."], "correct": 1, "explanation": "Second-order thinking looks at what follows from the immediate consequence."}, {"type": "quiz", "topic": "AI", "title": "Context or memory?", "question": "A model can read 200 pages in one session. What does that prove?", "choices": ["It has permanent memory.", "It has a large context window.", "It has perfect factual accuracy."], "correct": 1, "explanation": "Large context and durable memory are different capabilities."}, {"type": "quiz", "topic": "Robotics", "title": "Backdrivability", "question": "What does high backdrivability generally mean?", "choices": ["External forces can move the joint more easily.", "The motor cannot be controlled.", "The robot needs no sensors."], "correct": 0, "explanation": "Backdrivable joints can be moved by forces from the environment with less resistance."}, {"type": "quiz", "topic": "Psychology", "title": "Sunk cost", "question": "You spent $2M on a project. Future expected return is now negative. What is the rational baseline?", "choices": ["Continue because $2M is already spent.", "Ignore the sunk cost and evaluate future costs and benefits.", "Double the budget automatically."], "correct": 1, "explanation": "Past unrecoverable cost should not determine the next decision."}, {"type": "quiz", "topic": "Business", "title": "Cash flow", "question": "Which statement is correct?", "choices": ["High gross margin guarantees positive cash flow.", "Fast growth can consume cash.", "Revenue and cash are always received at the same time."], "correct": 1, "explanation": "Growth can increase receivables, inventory, and operating spending before cash arrives."}, {"type": "quiz", "topic": "History", "title": "Containerization", "question": "Why was containerization transformative?", "choices": ["The boxes were visually distinctive.", "Standardization reduced handling friction across transport modes.", "Ships became unnecessary."], "correct": 1, "explanation": "The major gain came from standardizing cargo transfer across the logistics chain."}, {"type": "quiz", "topic": "Geopolitics", "title": "Security dilemma", "question": "What is the core problem in a security dilemma?", "choices": ["Every state wants war.", "One side's defensive move can look offensive to another.", "Trade eliminates conflict."], "correct": 1, "explanation": "Capabilities are visible, but intentions are uncertain."}, {"type": "quiz", "topic": "Communication", "title": "BLUF", "question": "What should come first in BLUF communication?", "choices": ["Historical background.", "The conclusion or ask.", "Every supporting detail."], "correct": 1, "explanation": "BLUF means Bottom Line Up Front."}, {"type": "quiz", "topic": "Science", "title": "Causation", "question": "Sales of ice cream and sunburn both rise together. What can you conclude?", "choices": ["Ice cream causes sunburn.", "Sunburn causes ice cream sales.", "A third factor such as hot weather may cause both."], "correct": 2, "explanation": "Correlation alone does not establish causation."}];
+const SESSION_SIZE = 9;
+
+let state = JSON.parse(localStorage.getItem("daily_microlearn_v3")||"{}");
+state.xp ??= 0; state.streak ??= 1; state.saved ??= []; state.wrong ??= []; state.completedDates ??= [];
+const now = new Date();
+const today = localDateKey(now);
+if(state.lastVisit !== today){
+  if(state.lastVisit){
+    const d1 = new Date(state.lastVisit+"T00:00:00"), d2 = new Date(today+"T00:00:00");
+    const diff = Math.round((d2-d1)/86400000);
+    state.streak = diff===1 ? state.streak+1 : 1;
+  }
+  state.lastVisit = today;
+  persist();
+}
+document.getElementById("streak").textContent=state.streak;
+document.getElementById("xp").textContent=state.xp;
+document.getElementById("dateLabel").textContent=now.toLocaleDateString(undefined,{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+
+function localDateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function hash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function shuffled(arr,seed){const r=mulberry32(seed),a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function persist(){localStorage.setItem("daily_microlearn_v3",JSON.stringify(state))}
+
+function dailyDeck(){
+  const learns = BANK.map((x,i)=>({...x,_id:i})).filter(x=>x.type==="learn");
+  const quizzes = BANK.map((x,i)=>({...x,_id:i})).filter(x=>x.type==="quiz");
+  const topics = [...new Set(learns.map(x=>x.topic))];
+  const seed=hash(today);
+  const rand=mulberry32(seed);
+  let selected=[];
+  let topicOrder=shuffled(topics,seed);
+  topicOrder.slice(0,7).forEach((t,k)=>{
+    const pool=learns.filter(x=>x.topic===t);
+    selected.push(pool[Math.floor(rand()*pool.length)]);
+  });
+  const q=shuffled(quizzes,seed^0x9e3779b9).slice(0,2);
+  return shuffled([...selected,...q],seed^0x85ebca6b).slice(0,SESSION_SIZE);
+}
+
+let mode="today", deck=[], index=0, answered=false, correctToday=0;
+function switchMode(m){
+  mode=m; index=0; answered=false; correctToday=0;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.mode===m));
+  if(m==="today") deck=dailyDeck();
+  if(m==="review"){
+    const ids=[...new Set(state.wrong)].slice(-30).reverse();
+    deck=ids.map(id=>({...BANK[id],_id:id}));
+  }
+  if(m==="saved") deck=state.saved.map(id=>({...BANK[id],_id:id}));
+  render();
+}
+
+function render(){
+  const card=document.getElementById("card"), save=document.getElementById("saveBtn");
+  card.classList.remove("done"); save.style.visibility="visible";
+  if(!deck.length){
+    document.getElementById("fill").style.width="0%"; document.getElementById("counter").textContent="";
+    card.innerHTML=`<div><div class="eyebrow">${mode}</div><h1>${mode==="review"?"Nothing to review.":"Nothing saved yet."}</h1><div class="body">${mode==="review"?"Wrong answers will appear here automatically.":"Tap Save on any lesson to build your library."}</div></div>`;
+    save.style.visibility="hidden"; return;
+  }
+  answered=false;
+  const x=deck[index];
+  document.getElementById("fill").style.width=(index/deck.length*100)+"%";
+  document.getElementById("counter").textContent=(index+1)+" of "+deck.length;
+  updateSave();
+  if(x.type==="learn"){
+    card.innerHTML=`<div><div class="eyebrow">${x.topic} • ~1 min</div><h1>${x.title}</h1><div class="body">${x.body}</div><div class="fact">💡 ${x.fact}</div><div class="memory">🧠 ${x.memory}</div></div><div class="controls"><button class="secondary" onclick="next()">Skip</button><button class="primary" onclick="learned()">Got it →</button></div>`;
+  } else {
+    card.innerHTML=`<div><div class="eyebrow">${x.topic} • Quick check</div><h1>${x.title}</h1><div class="body">${x.question}</div><div class="choices">${x.choices.map((c,i)=>`<button class="choice" onclick="answer(${i},this)">${c}</button>`).join("")}</div><div class="feedback" id="feedback"></div></div><div class="controls"><button class="primary hidden" id="qnext" onclick="next()">Continue →</button></div>`;
+  }
+}
+function learned(){state.xp+=5;document.getElementById("xp").textContent=state.xp;persist();next()}
+function answer(i,el){
+  if(answered)return; answered=true; const x=deck[index]; const btns=[...document.querySelectorAll(".choice")];
+  btns[x.correct].classList.add("correct");
+  if(i!==x.correct){el.classList.add("wrong"); if(!state.wrong.includes(x._id))state.wrong.push(x._id); state.xp+=3}
+  else{correctToday++;state.xp+=10;state.wrong=state.wrong.filter(id=>id!==x._id)}
+  persist();document.getElementById("xp").textContent=state.xp;
+  document.getElementById("feedback").textContent=(i===x.correct?"✓ ":"Not quite. ")+x.explanation;
+  document.getElementById("qnext").classList.remove("hidden");
+}
+function next(){ if(index<deck.length-1){index++;render()}else finish() }
+function finish(){
+  document.getElementById("fill").style.width="100%";document.getElementById("counter").textContent="Complete";document.getElementById("saveBtn").style.visibility="hidden";
+  if(mode==="today"&&!state.completedDates.includes(today)){state.completedDates.push(today);state.xp+=20;persist();document.getElementById("xp").textContent=state.xp}
+  const qn=deck.filter(x=>x.type==="quiz").length;
+  const card=document.getElementById("card");card.classList.add("done");
+  card.innerHTML=`<div class="eyebrow">${mode==="today"?"Daily session complete":"Session complete"}</div><h1>${mode==="today"?"Better than scrolling.":"Review complete."}</h1><div class="body">${mode==="today"?"A new seeded mix appears automatically tomorrow.":"You cleared this set."}</div><div class="grid"><div class="stat"><b>${deck.length}</b><span>cards</span></div><div class="stat"><b>${qn?correctToday+"/"+qn:"—"}</b><span>quiz score</span></div><div class="stat"><b>${state.xp}</b><span>XP</span></div></div><div class="small">${state.wrong.length} item${state.wrong.length===1?"":"s"} currently waiting in Review.</div><div class="controls" style="width:100%"><button class="secondary" onclick="switchMode('review')">Review misses</button><button class="primary" onclick="restart()">Again</button></div>`;
+}
+function restart(){index=0;correctToday=0;render()}
+function toggleSave(){const id=deck[index]._id;const p=state.saved.indexOf(id);if(p>=0)state.saved.splice(p,1);else state.saved.push(id);persist();updateSave()}
+function updateSave(){const btn=document.getElementById("saveBtn"),id=deck[index]._id,on=state.saved.includes(id);btn.textContent=on?"★ Saved":"☆ Save";btn.classList.toggle("on",on)}
+
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBtn').style.display = 'inline-block';
+});
+async function installApp(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBtn').style.display = 'none';
+}
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'));
+}
+switchMode("today");
+
+</script>
+</body>
+</html>
