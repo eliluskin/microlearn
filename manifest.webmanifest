@@ -1,10 +1,10 @@
 {
-  "name": "LearningOS AI",
+  "name": "LearningOS",
   "short_name": "LearningOS",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#080A0F",
-  "theme_color": "#080A0F",
+  "background_color": "#07090D",
+  "theme_color": "#07090D",
   "icons": [
     {
       "src": "/icon-192.png",
