@@ -183,7 +183,28 @@ export default async function handler(
     "Cache-Control",
     "no-store"
   );
+if (req.method === "GET") {
+  try {
+    const pong = await redis("PING");
 
+    return res
+      .status(200)
+      .json({
+        ok:true,
+        redis:pong
+      });
+
+  } catch (e) {
+    return res
+      .status(500)
+      .json({
+        ok:false,
+        error:String(
+          e?.message || e
+        )
+      });
+  }
+}
   if (
     req.method !== "POST"
   ) {
