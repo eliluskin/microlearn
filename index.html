@@ -1012,7 +1012,34 @@ const DEF = {
 
 const STORAGE =
   "learningos_v5";
+function getDeviceId() {
+  const key = "learningos_device_id";
 
+  let id =
+    localStorage.getItem(key);
+
+  if (!id) {
+    id =
+      crypto.randomUUID
+        ? crypto.randomUUID()
+        : "device-" +
+          Date.now() +
+          "-" +
+          Math.random()
+            .toString(36)
+            .slice(2);
+
+    localStorage.setItem(
+      key,
+      id
+    );
+  }
+
+  return id;
+}
+
+const DEVICE_ID =
+  getDeviceId();
 let S = {};
 
 try {
