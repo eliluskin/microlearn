@@ -2014,9 +2014,10 @@ async function initialLoad() {
 
   } catch (e) {
 
-    console.error(e);
+  console.error(e);
+  alert("Feed error: " + (e?.message || String(e)));
 
-    setStatus(
+  setStatus(
       feed.length
         ? "CACHED"
         : "ERROR",
