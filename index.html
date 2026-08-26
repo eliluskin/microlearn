@@ -2055,13 +2055,63 @@ async function initialLoad() {
 
   try {
 
-    const d =
-      await requestBatch();
+let d = {
+  candidateCount:0,
+  items:[]
+};
 
-    const fresh =
-      mergeUnique(
-        d.items
+let fresh = [];
+
+let fromReservoir = false;
+
+try {
+
+  fresh =
+    await getReservoir();
+
+  fromReservoir =
+    fresh.length > 0;
+
+} catch (e) {
+
+  console.warn(
+    "Reservoir read failed",
+    e
+  );
+}
+
+if (!fresh.length) {
+
+  d =
+    await requestBatch();
+
+  fresh =
+    mergeUnique(
+      d.items
+    );
+
+  if (fresh.length) {
+
+    try {
+
+      const stored =
+        await putReservoir(
+          fresh
+        );
+
+      if (stored.length) {
+        fresh = stored;
+      }
+
+    } catch (e) {
+
+      console.warn(
+        "Reservoir seed failed",
+        e
       );
+    }
+  }
+}
 
     if (
       fresh.length
