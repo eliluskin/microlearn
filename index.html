@@ -1037,7 +1037,41 @@ function getDeviceId() {
 
   return id;
 }
+async function reservoirRequest(
+  action,
+  extra = {}
+) {
+  const r =
+    await fetch(
+      "/api/reservoir",
+      {
+        method:"POST",
 
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+
+        body:
+          JSON.stringify({
+            deviceId:
+              DEVICE_ID,
+
+            action,
+
+            ...extra
+          })
+      }
+    );
+
+  if (!r.ok) {
+    throw new Error(
+      `Reservoir HTTP ${r.status}`
+    );
+  }
+
+  return await r.json();
+}
 const DEVICE_ID =
   getDeviceId();
 let S = {};
