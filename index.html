@@ -1328,17 +1328,11 @@ const uniqItems = xs => {
 
 function profile() {
 
-  const delivered =
-    uniqItems([
-      ...S.seen,
-      ...feed.map(
-        x => ({
-          id:x.id,
-          title:x.title
-        })
-      )
-    ])
-    .slice(-180);
+const delivered =
+  uniqItems(
+    S.seen || []
+  )
+  .slice(-250);
 
   return {
 
