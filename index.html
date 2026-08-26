@@ -1037,6 +1037,26 @@ function getDeviceId() {
 
   return id;
 }
+  async function getReservoir() {
+  const d =
+    await reservoirRequest(
+      "get",
+      {
+        profile:
+          profile(),
+
+        seenIds:
+          (S.seen || [])
+            .map(x =>
+              String(x.id)
+            )
+      }
+    );
+
+  return Array.isArray(d.items)
+    ? d.items
+    : [];
+  }
 async function reservoirRequest(
   action,
   extra = {}
