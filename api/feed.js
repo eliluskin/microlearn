@@ -205,6 +205,64 @@ function byNewest(a, b) {
          (Date.parse(a.published) || 0);
 }
 
+const HORIZONS = {
+  "1w": 7,
+  "1m": 30,
+  "3m": 91,
+  "6m": 182,
+  "12m": 365
+};
+
+const isoDay = d =>
+  d.toISOString().slice(0, 10);
+
+function addDays(days) {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + days);
+  return isoDay(d);
+}
+
+// Validate the model's forecast and pin the deadline server-side so the
+// question text and resolveBy always agree.
+function cleanForecast(f) {
+  if (!f || typeof f !== "object") return null;
+
+  const horizon = String(f.horizon || "");
+  const options = (Array.isArray(f.options) ? f.options : [])
+    .map(o => String(o || "").trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  const aiPick = Number(f.ai_pick);
+  const aiConfidence = Number(f.ai_confidence);
+
+  if (
+    !HORIZONS[horizon] ||
+    options.length < 2 ||
+    !String(f.question || "").trim() ||
+    !String(f.criteria || "").trim() ||
+    !Number.isInteger(aiPick) ||
+    aiPick < 0 ||
+    aiPick >= options.length
+  ) {
+    return null;
+  }
+
+  return {
+    question: String(f.question).trim(),
+    options,
+    horizon,
+    resolveBy: addDays(HORIZONS[horizon]),
+    criteria: String(f.criteria).trim(),
+    aiPick,
+    aiConfidence:
+      Number.isFinite(aiConfidence)
+        ? Math.max(1 / options.length, Math.min(0.99, aiConfidence))
+        : 1 / options.length,
+    aiReason: String(f.ai_reason || "").trim()
+  };
+}
+
 export default async function handler(req, res) {
 
   res.setHeader("Cache-Control", "no-store");
@@ -341,6 +399,9 @@ export default async function handler(req, res) {
         image: x.image
       }));
 
+    const forecastCount =
+      batchSize >= 8 ? 3 : 2;
+
     const prompt = `
 You edit LearningOS, a personal intelligence feed designed to replace low-value scrolling with a richer, more useful, more surprising stream of current information.
 
@@ -381,14 +442,31 @@ This is not a school quiz and not only an executive-summary app.
 
 Make it genuinely interesting.
 
-Vary the mental experience across items:
-prediction,
-counterpoint,
-ranking,
-thesis,
-reflection,
-causal explanation,
-or scenario.
+FORECASTS:
+
+Today is ${isoDay(new Date())}.
+
+On exactly ${forecastCount} of the selected items (the ones whose story most naturally raises a question about the future), add a "forecast" object. All other items must have "forecast": null.
+
+A forecast is a concrete, checkable question about what will happen next, which the user answers before reality does. Good examples: where a price will be, whether a deal/vote/launch/escalation happens, whether a trend continues.
+
+Rules for forecasts:
+
+- Mix horizons across the batch. Allowed values and their deadlines:
+  "1w" = ${addDays(HORIZONS["1w"])}, "1m" = ${addDays(HORIZONS["1m"])}, "3m" = ${addDays(HORIZONS["3m"])}, "6m" = ${addDays(HORIZONS["6m"])}, "12m" = ${addDays(HORIZONS["12m"])}.
+  Prefer at least one short horizon (1w or 1m) per batch so feedback arrives quickly.
+
+- The question must name its deadline date explicitly.
+
+- Options: 2-4, mutually exclusive AND together covering every possible outcome. Use ranges/buckets where useful (e.g. "Up more than 5%", "Within 5% either way", "Down more than 5%").
+
+- Genuinely uncertain: avoid near-certain outcomes (e.g. "Will China invade Taiwan this week?"). An informed person should rate the likeliest option somewhere around 35-75%.
+
+- Price/market questions: you do not reliably know today's price. Express thresholds relative to the level on ${isoDay(new Date())} (e.g. "more than 5% above its ${isoDay(new Date())} close") unless the candidate metadata states the level.
+
+- criteria: an exact, objective resolution rule a neutral judge could apply with a web search on the deadline (which data source, which measure, what counts).
+
+- ai_pick / ai_confidence: your own honest forecast (0-based option index and probability 0-1) based only on what is known today.
 
 For every selected item return:
 
@@ -420,27 +498,6 @@ one non-obvious explanatory model, mechanism or reusable insight.
 novelty:
 what is genuinely new, changed or surprising.
 
-format:
-one of
-prediction,
-counterpoint,
-ranking,
-thesis,
-reflection,
-causal,
-scenario.
-
-prompt:
-one sharp judgment question that is not trivia.
-
-options:
-2-4 plausible choices when useful,
-otherwise [].
-
-reveal:
-a short useful response after a choice,
-never "correct/incorrect".
-
 tags:
 3-6 precise lowercase tags.
 
@@ -450,6 +507,10 @@ countries,
 companies,
 assets,
 or technologies.
+
+forecast:
+null, or an object with
+question, options, horizon, criteria, ai_pick, ai_confidence, ai_reason (one sentence).
 
 Do not invent facts beyond candidate metadata.
 
@@ -529,30 +590,10 @@ Return ONLY valid JSON in the form:
               x.novelty || ""
             ).trim(),
 
-          format:
-            String(
-              x.format ||
-              "reflection"
+          forecast:
+            cleanForecast(
+              x.forecast
             ),
-
-          prompt:
-            String(
-              x.prompt || ""
-            ).trim(),
-
-          options:
-            Array.isArray(
-              x.options
-            )
-              ? x.options
-                  .map(String)
-                  .slice(0, 4)
-              : [],
-
-          reveal:
-            String(
-              x.reveal || ""
-            ).trim(),
 
           tags:
             Array.isArray(
@@ -585,6 +626,14 @@ Return ONLY valid JSON in the form:
         0,
         batchSize
       );
+
+    let forecasts = 0;
+
+    for (const item of items) {
+      if (item.forecast && ++forecasts > forecastCount) {
+        item.forecast = null;
+      }
+    }
 
     return res.status(200).json({
       items,

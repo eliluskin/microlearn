@@ -482,7 +482,7 @@ button,input{
   width:min(780px,100%);
   display:grid;
   grid-template-columns:
-    repeat(3,1fr);
+    repeat(4,1fr);
   background:rgba(7,9,13,.9);
   backdrop-filter:blur(18px);
   border-top:
@@ -721,6 +721,249 @@ button,input{
     translateX(-50%)
 }
 
+.fc{
+  margin-top:12px;
+  border:1px solid rgba(169,143,255,.22);
+  background:rgba(169,143,255,.05);
+  border-radius:15px;
+  padding:13px 14px
+}
+
+.fc .it{
+  color:var(--violet)
+}
+
+.fcMeta{
+  font-size:10px;
+  color:var(--muted);
+  margin-top:5px
+}
+
+.confs{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:10px
+}
+
+.conf{
+  border:1px solid var(--line);
+  background:#171C25;
+  color:#DCE2E9;
+  border-radius:10px;
+  padding:8px 10px;
+  font-size:12px;
+  min-width:48px
+}
+
+.conf.sel{
+  border-color:var(--violet);
+  background:rgba(169,143,255,.16)
+}
+
+.lock{
+  width:100%;
+  margin-top:10px;
+  border:0;
+  border-radius:12px;
+  padding:11px;
+  background:var(--violet);
+  color:#0B0A12;
+  font-weight:900
+}
+
+.lock:disabled{
+  opacity:.35
+}
+
+.fcLine{
+  font-size:12px;
+  line-height:1.5;
+  color:#C9D0DB;
+  margin-top:8px
+}
+
+.fcLine b{
+  color:#fff
+}
+
+.verdict{
+  display:inline-block;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:5px 8px;
+  border-radius:8px;
+  margin-top:9px
+}
+
+.verdict.right{
+  color:var(--lime);
+  background:rgba(201,255,99,.1)
+}
+
+.verdict.wrong{
+  color:var(--red);
+  background:rgba(255,114,128,.1)
+}
+
+.verdict.void{
+  color:var(--muted);
+  background:#171C25
+}
+
+.tiles{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  margin-bottom:10px
+}
+
+.tile{
+  border:1px solid var(--line);
+  background:var(--p);
+  border-radius:18px;
+  padding:13px 14px
+}
+
+.tile small{
+  display:block;
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.1em
+}
+
+.tile b{
+  display:block;
+  font-size:26px;
+  letter-spacing:-.04em;
+  margin-top:5px
+}
+
+.tile span{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-top:2px
+}
+
+.chart{
+  width:100%;
+  display:block
+}
+
+.chart text{
+  fill:var(--muted);
+  font-size:10px
+}
+
+.chart .lbl{
+  fill:#DCE2E9
+}
+
+.hbars{
+  display:grid;
+  gap:9px
+}
+
+.hbar{
+  display:grid;
+  grid-template-columns:92px 1fr 74px;
+  align-items:center;
+  gap:8px;
+  font-size:11px;
+  color:#AEB7C4
+}
+
+.hbar .track{
+  height:8px;
+  background:#202631;
+  border-radius:4px;
+  overflow:hidden
+}
+
+.hbar .track i{
+  display:block;
+  height:100%;
+  background:var(--cyan);
+  border-radius:0 4px 4px 0
+}
+
+.hbar b{
+  color:#DCE2E9;
+  font-weight:600;
+  text-align:right
+}
+
+.fcItem{
+  border-top:1px solid var(--line);
+  padding:12px 0
+}
+
+.fcItem:first-of-type{
+  border-top:0;
+  padding-top:0
+}
+
+.fcItem .q{
+  font-size:13px;
+  font-weight:700;
+  line-height:1.4
+}
+
+.fcItem a{
+  color:var(--cyan);
+  font-size:11px
+}
+
+.override{
+  margin-top:8px;
+  font-size:11px;
+  color:var(--muted)
+}
+
+.override button{
+  border:1px solid var(--line);
+  background:#171C25;
+  color:#AEB7C4;
+  border-radius:9px;
+  padding:6px 8px;
+  font-size:11px;
+  margin:5px 5px 0 0
+}
+
+.legend{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:11px;
+  color:#AEB7C4;
+  margin:6px 0 4px
+}
+
+.legend i{
+  display:inline-block;
+  width:10px;
+  height:10px;
+  border-radius:3px;
+  margin-right:6px;
+  vertical-align:-1px
+}
+
+.navBadge{
+  display:inline-block;
+  min-width:16px;
+  padding:1px 4px;
+  margin-left:3px;
+  border-radius:8px;
+  background:var(--violet);
+  color:#0B0A12;
+  font-size:9px;
+  font-weight:900
+}
+
 @media(max-width:430px){
 
   .card h3{
@@ -883,8 +1126,106 @@ button,input{
   </h3>
 
   <div class="note">
-    Likes, dislikes, saves, article opens and interactive choices change your local topic, source, tag and entity weights. Delivered stories are remembered so future batches can suppress repetition. Every batch also reserves room for unfamiliar high-value material.
+    Likes, dislikes, saves, article opens and forecasts change your local topic, source, tag and entity weights. Delivered stories are remembered so future batches can suppress repetition. Every batch also reserves room for unfamiliar high-value material.
   </div>
+
+</div>
+
+</section>
+
+
+<section
+  id="forecast"
+  class="view"
+>
+
+<div class="header">
+
+  <div class="logo">
+    Your <em>foresight</em>
+  </div>
+
+  <div
+    id="fcStatus"
+    class="live"
+  >
+    TRACK RECORD
+  </div>
+
+</div>
+
+<div
+  id="fcTiles"
+  class="tiles"
+></div>
+
+<div class="box">
+
+  <h3>
+    Calibration
+  </h3>
+
+  <div class="note">
+    When you say 70%, does it happen about 70% of the time? Dots on the dashed line mean your confidence is well judged. Below the line means overconfident.
+  </div>
+
+  <div id="fcCalib"></div>
+
+</div>
+
+<div class="box">
+
+  <h3>
+    Where you see clearly
+  </h3>
+
+  <div
+    id="fcTopics"
+    class="hbars"
+  ></div>
+
+</div>
+
+<div class="box">
+
+  <h3>
+    Short vs long range
+  </h3>
+
+  <div
+    id="fcHorizons"
+    class="hbars"
+  ></div>
+
+</div>
+
+<div class="box">
+
+  <h3>
+    Results
+  </h3>
+
+  <div id="fcResolved"></div>
+
+</div>
+
+<div class="box">
+
+  <h3>
+    Waiting on reality
+  </h3>
+
+  <div id="fcOpen"></div>
+
+</div>
+
+<div class="box">
+
+  <h3>
+    Focus vs junk scrolling
+  </h3>
+
+  <div id="usage"></div>
 
 </div>
 
@@ -911,6 +1252,15 @@ button,input{
 >
   <span>☆</span>
   Saved
+</button>
+
+<button
+  class="nav"
+  data-v="forecast"
+  onclick="go('forecast')"
+>
+  <span>◈</span>
+  Foresight<i id="fcBadge" class="navBadge" style="display:none;font-style:normal"></i>
 </button>
 
 <button
@@ -1082,6 +1432,15 @@ function getDeviceId() {
     ? d.items
     : [];
   }
+async function consumeReservoir(ids) {
+  return reservoirRequest(
+    "consume",
+    {
+      ids:
+        (ids || []).map(String)
+    }
+  );
+}
 async function reservoirRequest(
   action,
   extra = {}
@@ -1235,6 +1594,19 @@ if (
   S.cache = null;
 }
 
+if (
+  !Array.isArray(S.forecasts)
+) {
+  S.forecasts = [];
+}
+
+if (
+  !S.usage ||
+  typeof S.usage !== "object"
+) {
+  S.usage = {};
+}
+
 let feed = [];
 
 let filter =
@@ -1328,11 +1700,19 @@ const uniqItems = xs => {
 
 function profile() {
 
-const delivered =
-  uniqItems(
-    S.seen || []
-  )
-  .slice(-250);
+  // Exclude both viewed stories and everything already in the feed,
+  // otherwise /api/feed keeps returning items we already have.
+  const delivered =
+    uniqItems([
+      ...(S.seen || []),
+      ...feed.map(
+        x => ({
+          id:x.id,
+          title:x.title
+        })
+      )
+    ])
+    .slice(-250);
 
   return {
 
@@ -1518,11 +1898,6 @@ function card(x) {
   const eid =
     idArg(x.id);
 
-  const choice =
-    S.choices[
-      String(x.id)
-    ];
-
   const fb =
     S.feedback[
       String(x.id)
@@ -1564,51 +1939,6 @@ function card(x) {
           </div>
 
         </div>`;
-
-  const opts =
-    (x.options || []).length
-
-      ? `<div class="interact">
-
-          <div class="it">
-            Think first
-          </div>
-
-          <div class="prompt">
-            ${esc(x.prompt || "")}
-          </div>
-
-          <div class="opts">
-
-            ${x.options.map(
-              (o,i) =>
-                `<button
-                  class="opt ${
-                    choice === i
-                      ? "sel"
-                      : ""
-                  }"
-                  onclick="choose('${eid}',${i})"
-                >
-                  ${esc(o)}
-                </button>`
-            ).join("")}
-
-          </div>
-
-          ${
-            choice !== undefined
-
-              ? `<div class="reveal">
-                  ${esc(x.reveal || "")}
-                </div>`
-
-              : ""
-          }
-
-        </div>`
-
-      : "";
 
   return `
   <article class="card" data-id="${eid}">
@@ -1679,7 +2009,7 @@ function card(x) {
           : ""
       }
 
-      ${opts}
+      ${forecastBlock(x)}
             <div class="actions">
 
         <button
@@ -2061,7 +2391,9 @@ let fromReservoir = false;
 try {
 
   fresh =
-    await getReservoir();
+    mergeUnique(
+      await getReservoir()
+    );
 
   fromReservoir =
     fresh.length > 0;
@@ -2084,32 +2416,22 @@ if (!fresh.length) {
       d.items
     );
 
-  if (fresh.length) {
-
-    try {
-
-      const stored =
-        await putReservoir(
-          fresh
-        );
-
-      if (stored.length) {
-        fresh = stored;
-      }
-
-    } catch (e) {
-
-      console.warn(
-        "Reservoir seed failed",
-        e
-      );
-    }
-  }
 }
 
     if (
       fresh.length
     ) {
+
+      if (fromReservoir) {
+        consumeReservoir(
+          fresh.map(x => x.id)
+        ).catch(e =>
+          console.warn(
+            "Reservoir consume failed",
+            e
+          )
+        );
+      }
 
       feed =
         uniqItems([
@@ -2493,49 +2815,6 @@ function toggleSave(
 }
 
 
-function choose(
-  encoded,
-  i
-) {
-
-  const x =
-    findItem(encoded);
-
-  if (!x) {
-    return;
-  }
-
-  S.choices[
-    String(x.id)
-  ] = i;
-
-  for (
-    const t of x.tags || []
-  ) {
-
-    adjustMap(
-      S.tags,
-      t,
-      .05
-    );
-  }
-
-  S.signals.push({
-    id:x.id,
-    type:"choice",
-    value:i,
-    time:Date.now()
-  });
-
-  S.signals =
-    S.signals.slice(-300);
-
-  save();
-
-  renderFeed();
-}
-
-
 function opened(encoded) {
 
   const x =
@@ -2607,6 +2886,12 @@ function go(v) {
     v === "model"
   ) {
     renderModel();
+  }
+
+  if (
+    v === "forecast"
+  ) {
+    renderForecast();
   }
 }
 
@@ -2780,6 +3065,944 @@ async function askAI(mode) {
 }
 
 
+// ---------- Forecasts ----------
+
+const HORIZON_LABEL = {
+  "1w":"1 week",
+  "1m":"1 month",
+  "3m":"3 months",
+  "6m":"6 months",
+  "12m":"12 months"
+};
+
+// Unsaved option/confidence picks, keyed by item id.
+const fcDraft = {};
+
+let fcResolving = false;
+
+const utcToday = () =>
+  new Date().toISOString().slice(0,10);
+
+const fcRecord = id =>
+  S.forecasts.find(
+    f => String(f.id) === String(id)
+  );
+
+function confChoices(n) {
+
+  const lo =
+    Math.ceil((100 / n + 5) / 5) * 5;
+
+  return [0,1,2,3,4].map(
+    i =>
+      Math.round(
+        (lo + (95 - lo) * i / 4) / 5
+      ) * 5
+  );
+}
+
+function daysUntil(day) {
+
+  return Math.round(
+    (Date.parse(day) - Date.parse(utcToday())) / 864e5
+  );
+}
+
+function deadlineText(f) {
+
+  const d =
+    daysUntil(f.resolveBy);
+
+  const when =
+    new Date(f.resolveBy + "T12:00:00Z")
+      .toLocaleDateString(
+        undefined,
+        { day:"numeric", month:"short", year:"numeric" }
+      );
+
+  if (d > 1) return `resolves ${when} · in ${d} days`;
+  if (d === 1) return `resolves tomorrow`;
+  return `due ${when} · checking result`;
+}
+
+// Multi-option Brier score: confidence on the pick, the rest spread
+// evenly. 0 is perfect; lower is better.
+function brier(pick, conf, n, outcome) {
+
+  let s = 0;
+
+  for (let i = 0; i < n; i++) {
+
+    const p =
+      i === pick
+        ? conf
+        : (1 - conf) / (n - 1);
+
+    s += (p - (i === outcome ? 1 : 0)) ** 2;
+  }
+
+  return s;
+}
+
+function forecastBlock(x) {
+
+  const f =
+    fcRecord(x.id);
+
+  const q =
+    f || x.forecast;
+
+  if (!q) {
+    return "";
+  }
+
+  const eid =
+    idArg(x.id);
+
+  const head = `
+    <div class="it">
+      Forecast · ${esc(HORIZON_LABEL[q.horizon] || q.horizon)}
+    </div>
+
+    <div class="prompt">
+      ${esc(q.question)}
+    </div>`;
+
+  if (!f) {
+
+    const draft =
+      fcDraft[String(x.id)] || {};
+
+    const confs =
+      draft.pick !== undefined
+        ? `<div class="fcMeta">
+             How sure are you?
+           </div>
+
+           <div class="confs">
+             ${confChoices(q.options.length).map(
+               c =>
+                 `<button
+                   class="conf ${draft.conf === c ? "sel" : ""}"
+                   onclick="fcConf('${eid}',${c})"
+                 >${c}%</button>`
+             ).join("")}
+           </div>
+
+           <button
+             class="lock"
+             ${draft.conf ? "" : "disabled"}
+             onclick="fcLock('${eid}')"
+           >
+             Lock in forecast
+           </button>`
+        : "";
+
+    return `
+      <div class="fc">
+
+        ${head}
+
+        <div class="fcMeta">
+          ${esc(deadlineText(q))}
+        </div>
+
+        <div class="opts">
+          ${q.options.map(
+            (o,i) =>
+              `<button
+                class="opt ${draft.pick === i ? "sel" : ""}"
+                onclick="fcPick('${eid}',${i})"
+              >
+                ${esc(o)}
+              </button>`
+          ).join("")}
+        </div>
+
+        ${confs}
+
+      </div>`;
+  }
+
+  return `
+    <div class="fc">
+      ${head}
+      ${fcResultHtml(f)}
+    </div>`;
+}
+
+function fcResultHtml(f) {
+
+  const yours = `
+    <div class="fcLine">
+      You: <b>${esc(f.options[f.pick])}</b> at ${Math.round(f.confidence * 100)}%
+    </div>
+    <div class="fcLine">
+      AI: <b>${esc(f.options[f.aiPick])}</b> at ${Math.round(f.aiConfidence * 100)}%${
+        f.aiReason ? ` · ${esc(f.aiReason)}` : ""
+      }
+    </div>`;
+
+  if (f.status === "void") {
+
+    return `
+      ${yours}
+      <span class="verdict void">Could not be settled</span>
+      ${f.evidence ? `<div class="fcLine">${esc(f.evidence)}</div>` : ""}`;
+  }
+
+  if (f.status !== "resolved") {
+
+    return `
+      ${yours}
+      <div class="fcMeta">
+        Locked · ${esc(deadlineText(f))}
+      </div>`;
+  }
+
+  const right =
+    f.outcome === f.pick;
+
+  const n =
+    f.options.length;
+
+  const you =
+    brier(f.pick, f.confidence, n, f.outcome);
+
+  const them =
+    brier(f.aiPick, f.aiConfidence, n, f.outcome);
+
+  return `
+    ${yours}
+
+    <span class="verdict ${right ? "right" : "wrong"}">
+      ${right ? "✓ You called it" : "✗ Missed"}
+    </span>
+
+    <div class="fcLine">
+      What happened: <b>${esc(f.options[f.outcome])}</b>${
+        f.overridden ? " (your correction)" : ""
+      }
+    </div>
+
+    <div class="fcLine">
+      Score ${you.toFixed(2)} vs AI ${them.toFixed(2)} (lower is better) · ${
+        you < them - 0.005
+          ? "you beat the AI"
+          : you > them + 0.005
+            ? "the AI beat you"
+            : "tie"
+      }
+    </div>
+
+    ${f.evidence ? `<div class="fcLine">${esc(f.evidence)}</div>` : ""}
+
+    ${f.lesson ? `<div class="reveal">${esc(f.lesson)}</div>` : ""}`;
+}
+
+function rerenderCards() {
+
+  renderFeed();
+  renderSaved();
+
+  if (
+    document.getElementById("forecast").classList.contains("on")
+  ) {
+    renderForecast();
+  }
+}
+
+function fcPick(encoded, i) {
+
+  const id =
+    decodeURIComponent(encoded);
+
+  fcDraft[id] = {
+    ...(fcDraft[id] || {}),
+    pick:i
+  };
+
+  rerenderCards();
+}
+
+function fcConf(encoded, c) {
+
+  const id =
+    decodeURIComponent(encoded);
+
+  fcDraft[id] = {
+    ...(fcDraft[id] || {}),
+    conf:c
+  };
+
+  rerenderCards();
+}
+
+function fcLock(encoded) {
+
+  const x =
+    findItem(encoded);
+
+  const id =
+    decodeURIComponent(encoded);
+
+  const draft =
+    fcDraft[id];
+
+  if (
+    !x?.forecast ||
+    !draft ||
+    draft.pick === undefined ||
+    !draft.conf ||
+    fcRecord(id)
+  ) {
+    return;
+  }
+
+  S.forecasts.push({
+    id:x.id,
+    title:x.title,
+    url:x.url,
+    topic:x.topic,
+    question:x.forecast.question,
+    options:x.forecast.options,
+    horizon:x.forecast.horizon,
+    resolveBy:x.forecast.resolveBy,
+    criteria:x.forecast.criteria,
+    aiPick:x.forecast.aiPick,
+    aiConfidence:x.forecast.aiConfidence,
+    aiReason:x.forecast.aiReason || "",
+    pick:draft.pick,
+    confidence:draft.conf / 100,
+    createdAt:new Date().toISOString(),
+    status:"open"
+  });
+
+  delete fcDraft[id];
+
+  for (const t of x.tags || []) {
+    adjustMap(S.tags, t, .05);
+  }
+
+  S.signals.push({
+    id:x.id,
+    type:"forecast",
+    time:Date.now()
+  });
+
+  S.signals =
+    S.signals.slice(-300);
+
+  save();
+  syncForecasts();
+  rerenderCards();
+
+  toast("Locked in. The app will score it on the deadline");
+}
+
+function fcOverride(encoded, outcome) {
+
+  const f =
+    fcRecord(decodeURIComponent(encoded));
+
+  if (!f || f.status !== "resolved") {
+    return;
+  }
+
+  f.outcome = outcome;
+  f.overridden = true;
+
+  save();
+  syncForecasts();
+  rerenderCards();
+  renderForecast();
+
+  toast("Result corrected");
+}
+
+async function forecastRequest(action, extra = {}) {
+
+  const r =
+    await fetch(
+      "/api/forecast",
+      {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+          deviceId:DEVICE_ID,
+          action,
+          ...extra
+        })
+      }
+    );
+
+  if (!r.ok) {
+    throw new Error(`Forecast HTTP ${r.status}`);
+  }
+
+  return r.json();
+}
+
+let syncTimer = null;
+
+// Best-effort backup to the server; the device copy stays the source of truth.
+function syncForecasts() {
+
+  clearTimeout(syncTimer);
+
+  syncTimer =
+    setTimeout(
+      () =>
+        forecastRequest(
+          "sync",
+          { items:S.forecasts }
+        ).catch(e =>
+          console.warn("Forecast backup failed", e)
+        ),
+      800
+    );
+}
+
+async function restoreForecasts() {
+
+  if (S.forecasts.length) {
+    return;
+  }
+
+  try {
+
+    const d =
+      await forecastRequest("restore");
+
+    if (
+      Array.isArray(d.items) &&
+      d.items.length &&
+      !S.forecasts.length
+    ) {
+      S.forecasts = d.items;
+      save();
+      rerenderCards();
+    }
+
+  } catch (e) {
+    console.warn("Forecast restore failed", e);
+  }
+}
+
+async function resolveDue() {
+
+  if (fcResolving) {
+    return;
+  }
+
+  const today =
+    utcToday();
+
+  // Re-ask the judge about an unsettled question at most twice a day.
+  const due =
+    S.forecasts.filter(
+      f =>
+        f.status === "open" &&
+        f.resolveBy <= today &&
+        (
+          !f.checkedAt ||
+          Date.now() - Date.parse(f.checkedAt) > 12 * 36e5
+        )
+    )
+    .slice(0,3);
+
+  if (!due.length) {
+    return;
+  }
+
+  fcResolving = true;
+
+  try {
+
+    const d =
+      await forecastRequest(
+        "resolve",
+        { items:due }
+      );
+
+    let settled = 0;
+
+    for (const r of d.results || []) {
+
+      const f =
+        fcRecord(r.id);
+
+      if (!f || f.status !== "open") {
+        continue;
+      }
+
+      if (r.status === "resolved" || r.status === "void") {
+        Object.assign(f, r);
+        settled++;
+      } else {
+        f.checkedAt = new Date().toISOString();
+      }
+    }
+
+    if (settled) {
+      S.fcUnseen =
+        (S.fcUnseen || 0) + settled;
+    }
+
+    save();
+    syncForecasts();
+    rerenderCards();
+    navBadge();
+
+    if (settled) {
+      toast(
+        `${settled} forecast${settled > 1 ? "s" : ""} scored. See Foresight`
+      );
+    }
+
+  } catch (e) {
+    console.warn("Forecast resolution failed", e);
+  } finally {
+    fcResolving = false;
+  }
+}
+
+function navBadge() {
+
+  const el =
+    document.getElementById("fcBadge");
+
+  if (!el) return;
+
+  el.textContent =
+    S.fcUnseen || "";
+
+  el.style.display =
+    S.fcUnseen ? "inline-block" : "none";
+}
+
+function hbarsHtml(rows) {
+
+  if (!rows.length) {
+    return `<div class="note">Appears once some forecasts are scored.</div>`;
+  }
+
+  return rows.map(
+    r =>
+      `<div class="hbar" title="${esc(`${r.label}: ${r.hit}/${r.n} right`)}">
+        <span>${esc(r.label)}</span>
+        <div class="track"><i style="width:${Math.max(2, r.rate * 100)}%"></i></div>
+        <b>${Math.round(r.rate * 100)}% · ${r.n}</b>
+      </div>`
+  ).join("");
+}
+
+function groupRates(list, key, order) {
+
+  const g = {};
+
+  for (const f of list) {
+    const k = key(f);
+    g[k] = g[k] || { label:k, n:0, hit:0 };
+    g[k].n++;
+    if (f.outcome === f.pick) g[k].hit++;
+  }
+
+  return Object.values(g)
+    .map(r => ({ ...r, rate:r.hit / r.n }))
+    .sort((a,b) =>
+      order
+        ? order.indexOf(a.label) - order.indexOf(b.label)
+        : b.n - a.n
+    );
+}
+
+function calibrationSvg(list) {
+
+  if (list.length < 3) {
+    return `<div class="note" style="margin-top:10px">Needs at least 3 scored forecasts.</div>`;
+  }
+
+  const buckets = [
+    [0,.5],[.5,.6],[.6,.7],[.7,.8],[.8,.9],[.9,1.01]
+  ]
+  .map(([lo,hi]) => {
+    const xs = list.filter(f => f.confidence >= lo && f.confidence < hi);
+    return xs.length
+      ? {
+          conf:xs.reduce((s,f) => s + f.confidence, 0) / xs.length,
+          rate:xs.filter(f => f.outcome === f.pick).length / xs.length,
+          n:xs.length
+        }
+      : null;
+  })
+  .filter(Boolean);
+
+  const W = 300, H = 226, L = 34, R = 16, T = 24, B = 42;
+  const x = v => L + v * (W - L - R);
+  const y = v => T + (1 - v) * (H - T - B);
+
+  const grid = [0,.25,.5,.75,1].map(v => `
+    <line x1="${x(0)}" x2="${x(1)}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.06)"/>
+    <text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${v * 100}%</text>
+    <text x="${x(v)}" y="${H - B + 14}" text-anchor="middle">${v * 100}%</text>`
+  ).join("");
+
+  const dots = buckets.map(b => `
+    <g>
+      <title>Said ~${Math.round(b.conf * 100)}% → right ${Math.round(b.rate * 100)}% of ${b.n}</title>
+      <circle cx="${x(b.conf)}" cy="${y(b.rate)}" r="${5 + Math.min(5, b.n)}" fill="var(--cyan)" stroke="var(--p)" stroke-width="2"/>
+      <text class="lbl" x="${x(b.conf)}" y="${y(b.rate) - 12 - Math.min(5, b.n)}" text-anchor="middle">${b.n}</text>
+    </g>`
+  ).join("");
+
+  return `
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Calibration: stated confidence vs how often you were right">
+      ${grid}
+      <line x1="${x(0)}" y1="${y(0)}" x2="${x(1)}" y2="${y(1)}" stroke="var(--muted)" stroke-dasharray="4 4"/>
+      ${dots}
+      <text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">How sure you said you were</text>
+    </svg>
+    <div class="note">Vertical: how often you were right. Number = forecasts in that group.</div>`;
+}
+
+let junkUsage =
+  null;
+
+const JUNK_SITES = {
+  ynet:"Ynet",
+  walla:"Walla",
+  linkedin:"LinkedIn"
+};
+
+const junkMin = day =>
+  Object.keys(JUNK_SITES).reduce(
+    (s,k) => s + (junkUsage?.days?.[day]?.[k] || 0),
+    0
+  ) / 60;
+
+async function loadJunkUsage() {
+
+  try {
+
+    const r =
+      await fetch(
+        "/api/usage",
+        {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({
+            deviceId:DEVICE_ID,
+            action:"get"
+          })
+        }
+      );
+
+    if (!r.ok) {
+      throw new Error(`Usage HTTP ${r.status}`);
+    }
+
+    junkUsage =
+      await r.json();
+
+  } catch (e) {
+    console.warn("Usage load failed", e);
+  }
+
+  if (
+    document.getElementById("forecast").classList.contains("on")
+  ) {
+    document.getElementById("usage").innerHTML =
+      usageHtml();
+  }
+}
+
+function pct(now, before) {
+
+  if (!before) return "";
+
+  const d =
+    Math.round((now - before) / before * 100);
+
+  return `${d > 0 ? "+" : ""}${d}% vs previous week`;
+}
+
+function usageHtml() {
+
+  const tracked =
+    !!junkUsage?.lastSync;
+
+  const days = [];
+
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 864e5);
+    const k = localDay(d);
+    days.push({
+      k,
+      label:d.getDate(),
+      app:(S.usage[k] || 0) / 60,
+      junk:junkMin(k)
+    });
+  }
+
+  const sum = (xs, key) =>
+    xs.reduce((s,d) => s + d[key], 0);
+
+  const appWeek = sum(days.slice(7), "app");
+  const appPrev = sum(days.slice(0,7), "app");
+  const junkWeek = sum(days.slice(7), "junk");
+  const junkPrev = sum(days.slice(0,7), "junk");
+
+  const max =
+    Math.max(10, ...days.map(d => Math.max(d.app, d.junk)));
+
+  const W = 300, H = 130, B = 18, T = 8, slot = 300 / 14, bw = (slot - 6) / 2;
+
+  const bar = (x, v, color, label) => {
+    const h = v / max * (H - B - T);
+    return `<rect x="${x}" y="${H - B - h}" width="${bw}" height="${Math.max(h, v ? 2 : 0)}" rx="2" fill="${color}"><title>${label}: ${Math.round(v)} min</title></rect>`;
+  };
+
+  const bars = days.map((d,i) => {
+    const x = i * slot + 3;
+    return `
+      <g>
+        ${bar(x, d.app, "#2F95C8", `${d.k} LearningOS`)}
+        ${tracked ? bar(x + bw + 1, d.junk, "#D0683A", `${d.k} Ynet, Walla, LinkedIn`) : ""}
+        <text x="${i * slot + slot / 2}" y="${H - 4}" text-anchor="middle">${d.label}</text>
+      </g>`;
+  }).join("");
+
+  const todayJunk =
+    Object.entries(JUNK_SITES)
+      .map(([k,name]) => `${name} ${Math.round((junkUsage?.days?.[days[13].k]?.[k] || 0) / 60)}`)
+      .join(" · ");
+
+  const pairUrl =
+    `learningos-tracker://pair?server=${encodeURIComponent(location.origin)}&device=${encodeURIComponent(DEVICE_ID)}`;
+
+  return `
+    <div class="tiles" style="margin:0 0 8px">
+      <div class="tile">
+        <small>LearningOS · 7 days</small>
+        <b>${Math.round(appWeek)} min</b>
+        <span>${esc(pct(appWeek, appPrev) || `${Math.round(days[13].app)} min today`)}</span>
+      </div>
+      <div class="tile">
+        <small>Junk · 7 days</small>
+        <b>${tracked ? Math.round(junkWeek) + " min" : "–"}</b>
+        <span>${tracked ? esc(pct(junkWeek, junkPrev) || `${Math.round(days[13].junk)} min today`) : "connect the tracker"}</span>
+      </div>
+    </div>
+
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Minutes per day, last 14 days: LearningOS vs Ynet, Walla and LinkedIn">
+      ${bars}
+    </svg>
+
+    <div class="legend">
+      <span><i style="background:#2F95C8"></i>LearningOS</span>
+      ${tracked ? `<span><i style="background:#D0683A"></i>Ynet, Walla, LinkedIn</span>` : ""}
+    </div>
+
+    ${tracked
+      ? `<div class="note">Today: ${esc(todayJunk)} min. Tracker last synced ${esc(new Date(junkUsage.lastSync).toLocaleString())}.</div>`
+      : `<div class="note">
+           To measure Ynet, Walla and LinkedIn, install the LearningOS Tracker app on this phone, then tap:
+         </div>
+         <a class="retry" style="display:block;text-align:center;text-decoration:none" href="${esc(pairUrl)}">
+           Connect Android tracker
+         </a>
+         <div class="note" style="margin-top:8px">
+           Or enter manually in the tracker: address <b>${esc(location.origin)}</b>, code <b>${esc(DEVICE_ID)}</b>
+         </div>`}`;
+}
+
+function renderForecast() {
+
+  S.fcUnseen = 0;
+  save();
+  navBadge();
+
+  const scored =
+    S.forecasts.filter(f => f.status === "resolved");
+
+  const open =
+    S.forecasts
+      .filter(f => f.status === "open")
+      .sort((a,b) => a.resolveBy.localeCompare(b.resolveBy));
+
+  const hits =
+    scored.filter(f => f.outcome === f.pick).length;
+
+  const avg = key =>
+    scored.length
+      ? scored.reduce((s,f) => s + key(f), 0) / scored.length
+      : null;
+
+  const you =
+    avg(f => brier(f.pick, f.confidence, f.options.length, f.outcome));
+
+  const them =
+    avg(f => brier(f.aiPick, f.aiConfidence, f.options.length, f.outcome));
+
+  const beat =
+    scored.filter(f =>
+      brier(f.pick, f.confidence, f.options.length, f.outcome) <
+      brier(f.aiPick, f.aiConfidence, f.options.length, f.outcome) - 0.005
+    ).length;
+
+  const overconf =
+    scored.length
+      ? avg(f => f.confidence) - hits / scored.length
+      : null;
+
+  document.getElementById("fcTiles").innerHTML = `
+    <div class="tile">
+      <small>Called it</small>
+      <b>${scored.length ? Math.round(hits / scored.length * 100) + "%" : "–"}</b>
+      <span>${hits} of ${scored.length} scored</span>
+    </div>
+    <div class="tile">
+      <small>You vs AI</small>
+      <b>${scored.length ? `${beat}/${scored.length}` : "–"}</b>
+      <span>${you === null ? "forecasts where you beat it" : `score ${you.toFixed(2)} vs ${them.toFixed(2)}`}</span>
+    </div>
+    <div class="tile">
+      <small>Confidence gap</small>
+      <b>${overconf === null ? "–" : (overconf > 0 ? "+" : "") + Math.round(overconf * 100) + " pts"}</b>
+      <span>${overconf === null ? "sure vs right" : overconf > 0.05 ? "overconfident" : overconf < -0.05 ? "underconfident" : "well calibrated"}</span>
+    </div>
+    <div class="tile">
+      <small>Waiting</small>
+      <b>${open.length}</b>
+      <span>${open.length ? "next: " + esc(deadlineText(open[0]).replace(/^resolves /,"")) : "lock in a forecast in the feed"}</span>
+    </div>`;
+
+  document.getElementById("fcCalib").innerHTML =
+    calibrationSvg(scored);
+
+  document.getElementById("fcTopics").innerHTML =
+    hbarsHtml(groupRates(scored, f => f.topic || "Other"));
+
+  const hOrder =
+    Object.values(HORIZON_LABEL);
+
+  document.getElementById("fcHorizons").innerHTML =
+    hbarsHtml(groupRates(scored, f => HORIZON_LABEL[f.horizon] || f.horizon, hOrder));
+
+  const done =
+    S.forecasts
+      .filter(f => f.status === "resolved" || f.status === "void")
+      .sort((a,b) => String(b.resolvedAt).localeCompare(String(a.resolvedAt)));
+
+  document.getElementById("fcResolved").innerHTML =
+    done.length
+      ? done.map(f => {
+          const eid = idArg(f.id);
+          return `
+            <div class="fcItem">
+              <div class="q">${esc(f.question)}</div>
+              ${fcResultHtml(f)}
+              ${(f.sources || []).length
+                ? `<div class="fcLine">${f.sources.map((s,i) => `<a href="${esc(s)}" target="_blank" rel="noopener">source ${i + 1}</a>`).join(" · ")}</div>`
+                : ""}
+              ${f.status === "resolved"
+                ? `<div class="override">
+                     Judge got it wrong? Set what actually happened:<br>
+                     ${f.options.map((o,i) =>
+                       i === f.outcome
+                         ? ""
+                         : `<button onclick="fcOverride('${eid}',${i})">${esc(o)}</button>`
+                     ).join("")}
+                   </div>`
+                : ""}
+            </div>`;
+        }).join("")
+      : `<div class="note">No results yet. Short-range forecasts (1 week) come back first.</div>`;
+
+  document.getElementById("fcOpen").innerHTML =
+    open.length
+      ? open.map(f => `
+          <div class="fcItem">
+            <div class="q">${esc(f.question)}</div>
+            ${fcResultHtml(f)}
+          </div>`
+        ).join("")
+      : `<div class="note">Nothing pending. Look for the purple Forecast box on feed cards.</div>`;
+
+  document.getElementById("usage").innerHTML =
+    usageHtml();
+
+  loadJunkUsage();
+
+  resolveDue();
+}
+
+// ---------- Time in app ----------
+
+function localDay(d = new Date()) {
+
+  return [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2,"0"),
+    String(d.getDate()).padStart(2,"0")
+  ].join("-");
+}
+
+let lastActive =
+  Date.now();
+
+function startUsageTracking() {
+
+  for (const ev of ["touchstart","scroll","click","keydown","mousemove"]) {
+    window.addEventListener(
+      ev,
+      () => { lastActive = Date.now(); },
+      { passive:true }
+    );
+  }
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+      if (document.visibilityState === "visible") {
+        lastActive = Date.now();
+      } else {
+        save();
+      }
+    }
+  );
+
+  let ticks = 0;
+
+  setInterval(() => {
+
+    if (
+      document.visibilityState !== "visible" ||
+      Date.now() - lastActive > 90000
+    ) {
+      return;
+    }
+
+    const k = localDay();
+
+    S.usage[k] =
+      (S.usage[k] || 0) + 5;
+
+    if (++ticks % 6 === 0) {
+
+      const keep =
+        Object.keys(S.usage).sort().slice(-60);
+
+      S.usage =
+        Object.fromEntries(keep.map(d => [d, S.usage[d]]));
+
+      save();
+    }
+  }, 5000);
+}
+
+
 async function boot() {
 
   filters();
@@ -2812,7 +4035,15 @@ async function boot() {
 
   bootObserver();
 
+  startUsageTracking();
+
+  navBadge();
+
+  await restoreForecasts();
+
   await initialLoad();
+
+  resolveDue();
 }
 
 

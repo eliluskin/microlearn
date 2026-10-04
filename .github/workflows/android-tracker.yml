@@ -1,0 +1,53 @@
+name: Android tracker
+
+on:
+  push:
+    paths:
+      - "android/**"
+      - ".github/workflows/android-tracker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      - name: Build APK
+        run: gradle --no-daemon assembleRelease
+
+      - name: Rename APK
+        run: cp app/build/outputs/apk/release/app-release.apk LearningOS-Tracker.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LearningOS-Tracker
+          path: android/LearningOS-Tracker.apk
+
+      # A release page gives a phone-friendly download link.
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: tracker-v${{ github.run_number }}
+          name: LearningOS Tracker ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          files: android/LearningOS-Tracker.apk
+          body: |
+            Android tracker for LearningOS. On your phone, download LearningOS-Tracker.apk below and open it to install.
+            Built from ${{ github.ref_name }} @ ${{ github.sha }}.
