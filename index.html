@@ -121,8 +121,50 @@ button,input{
   color:var(--muted)
 }
 
-.live.on{
-  color:var(--lime)
+.live.on,
+.live.is-ok{
+  color:var(--lime);
+  border-color:rgba(201,255,99,.35);
+  background:rgba(201,255,99,.06)
+}
+
+/* Fetching: green with a spinning ring so progress is visible. */
+.live.is-loading{
+  color:var(--lime);
+  border-color:rgba(201,255,99,.35);
+  background:rgba(201,255,99,.06)
+}
+
+.live.is-loading::before{
+  content:"";
+  display:inline-block;
+  width:8px;
+  height:8px;
+  margin-right:6px;
+  vertical-align:-1px;
+  border:2px solid var(--lime);
+  border-top-color:transparent;
+  border-radius:50%;
+  animation:spin .8s linear infinite
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg)
+  }
+}
+
+/* Showing old stories, or the update failed. */
+.live.is-stale{
+  color:var(--red);
+  border-color:rgba(255,114,128,.35);
+  background:rgba(255,114,128,.06)
+}
+
+@media (prefers-reduced-motion:reduce){
+  .live.is-loading::before{
+    animation-duration:2.4s
+  }
 }
 
 .section{
@@ -147,8 +189,30 @@ button,input{
   display:flex;
   gap:7px;
   overflow:auto;
-  padding-bottom:9px;
-  scrollbar-width:none
+  scrollbar-width:none;
+  padding-bottom:9px
+}
+
+.stickyTop{
+  position:sticky;
+  top:0;
+  z-index:20;
+  margin:0 -12px 3px;
+  padding:
+    calc(6px + env(safe-area-inset-top)) 12px 0;
+  background:var(--bg)
+}
+
+.stickyTop .section{
+  align-items:center;
+  margin:0 2px 2px
+}
+
+.metaLine{
+  display:block;
+  font-size:10px;
+  color:var(--muted);
+  margin:0 2px 8px
 }
 
 .filters::-webkit-scrollbar{
@@ -256,6 +320,20 @@ button,input{
 
 .content{
   padding:17px
+}
+
+.ticon{
+  display:inline-grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  margin-right:6px;
+  border-radius:7px;
+  background:rgba(112,231,255,.08);
+  color:var(--cyan);
+  font-size:12px;
+  letter-spacing:0;
+  vertical-align:middle
 }
 
 .source{
@@ -994,14 +1072,9 @@ button,input{
     Learning<em>OS</em>
   </div>
 
-  <div
-    id="status"
-    class="live"
-  >
-    STARTING
-  </div>
-
 </div>
+
+<div class="stickyTop">
 
 <div class="section">
 
@@ -1009,16 +1082,28 @@ button,input{
     Your feed
   </h2>
 
-  <small id="meta">
-    loading automatically
-  </small>
+  <div
+    id="status"
+    class="live is-loading"
+  >
+    STARTING
+  </div>
 
 </div>
+
+<small
+  id="meta"
+  class="metaLine"
+>
+  loading automatically
+</small>
 
 <div
   class="filters"
   id="filters"
 ></div>
+
+</div>
 
 <div
   id="feed"
@@ -1757,9 +1842,22 @@ function setStatus(
   el.textContent =
     text;
 
-  el.classList.toggle(
+  const state =
+    text === "LOADING" || text === "STARTING"
+      ? "is-loading"
+      : text === "LIVE"
+        ? "is-ok"
+        : "is-stale";
+
+  el.classList.remove(
     "on",
-    on
+    "is-ok",
+    "is-loading",
+    "is-stale"
+  );
+
+  el.classList.add(
+    state
   );
 }
 
@@ -1910,6 +2008,8 @@ function card(x) {
         String(x.id)
     );
 
+  // Real photos keep the image header; stories without one get a small
+  // topic icon next to the source instead of a large placeholder.
   const visual =
     x.image
 
@@ -1919,7 +2019,7 @@ function card(x) {
             src="${esc(x.image)}"
             alt=""
             loading="lazy"
-            onerror="this.parentElement.innerHTML='<div class=&quot;vf&quot;>${topicEmoji(x.topic)}</div>'"
+            onerror="this.parentElement.remove()"
           >
 
           <div class="badge new">
@@ -1928,17 +2028,7 @@ function card(x) {
 
         </div>`
 
-      : `<div class="visual">
-
-          <div class="vf">
-            ${topicEmoji(x.topic)}
-          </div>
-
-          <div class="badge new">
-            ${esc(x.topic || "NEW")}
-          </div>
-
-        </div>`;
+      : "";
 
   return `
   <article class="card" data-id="${eid}">
@@ -1948,6 +2038,8 @@ function card(x) {
     <div class="content">
 
       <div class="source">
+
+        <span class="ticon">${topicEmoji(x.topic)}</span>
 
         ${esc(x.source || "")}
         ·
@@ -2545,6 +2637,15 @@ if (!fresh.length) {
 
   loading = true;
 
+  const statusBefore =
+    document.getElementById(
+      "status"
+    ).textContent.trim();
+
+  setStatus(
+    "LOADING"
+  );
+
   document.getElementById(
     "moreState"
   ).innerHTML =
@@ -2598,6 +2699,10 @@ if (!fresh.length) {
 
       exhausted = true;
 
+      setStatus(
+        statusBefore
+      );
+
       document.getElementById(
         "moreState"
       ).textContent =
@@ -2607,6 +2712,10 @@ if (!fresh.length) {
   } catch (e) {
 
     console.error(e);
+
+    setStatus(
+      statusBefore
+    );
 
     document.getElementById(
       "moreState"
