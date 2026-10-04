@@ -3197,7 +3197,9 @@ const HORIZON_LABEL = {
   "1m":"1 month",
   "3m":"3 months",
   "6m":"6 months",
-  "12m":"12 months"
+  "12m":"12 months",
+  "2y":"2 years",
+  "3y":"3 years"
 };
 
 // Unsaved option/confidence picks, keyed by item id.
@@ -3380,6 +3382,9 @@ function fcResultHtml(f) {
 
     return `
       ${yours}
+      ${f.baseRate
+        ? `<div class="reveal"><b>Outside view:</b> ${esc(f.baseRate)}</div>`
+        : ""}
       <div class="fcMeta">
         Locked · ${esc(deadlineText(f))}
       </div>`;
@@ -3496,6 +3501,7 @@ function fcLock(encoded) {
     aiPick:x.forecast.aiPick,
     aiConfidence:x.forecast.aiConfidence,
     aiReason:x.forecast.aiReason || "",
+    baseRate:x.forecast.baseRate || "",
     pick:draft.pick,
     confidence:draft.conf / 100,
     createdAt:new Date().toISOString(),

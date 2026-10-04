@@ -206,12 +206,12 @@ function byNewest(a, b) {
          (Date.parse(a.published) || 0);
 }
 
+// Strategic horizons only: short-term questions are mostly noise.
 const HORIZONS = {
-  "1w": 7,
-  "1m": 30,
-  "3m": 91,
   "6m": 182,
-  "12m": 365
+  "12m": 365,
+  "2y": 730,
+  "3y": 1095
 };
 
 const isoDay = d =>
@@ -260,7 +260,8 @@ function cleanForecast(f) {
       Number.isFinite(aiConfidence)
         ? Math.max(1 / options.length, Math.min(0.99, aiConfidence))
         : 1 / options.length,
-    aiReason: String(f.ai_reason || "").trim()
+    aiReason: String(f.ai_reason || "").trim(),
+    baseRate: String(f.base_rate || "").trim()
   };
 }
 
@@ -404,8 +405,8 @@ export default async function handler(req, res) {
         image: x.image
       }));
 
-    const forecastCount =
-      batchSize >= 8 ? 3 : 2;
+    // One strong strategic question per batch beats several weak ones.
+    const forecastCount = 1;
 
     const prompt = `
 You edit LearningOS, a personal intelligence feed designed to replace low-value scrolling with a richer, more useful, more surprising stream of current information.
@@ -453,21 +454,25 @@ Today is ${isoDay(new Date())}.
 
 On exactly ${forecastCount} of the selected items (the ones whose story most naturally raises a question about the future), add a "forecast" object. All other items must have "forecast": null.
 
-A forecast is a concrete, checkable question about what will happen next, which the user answers before reality does. Good examples: where a price will be, whether a deal/vote/launch/escalation happens, whether a trend continues.
+A forecast is a strategic, directional question about where a structural trend or situation is heading, which the user answers by tapping an option before reality does. It must exercise judgement about long-term forces, not luck about short-term moves.
 
 Rules for forecasts:
 
-- Mix horizons across the batch. Allowed values and their deadlines:
-  "1w" = ${addDays(HORIZONS["1w"])}, "1m" = ${addDays(HORIZONS["1m"])}, "3m" = ${addDays(HORIZONS["3m"])}, "6m" = ${addDays(HORIZONS["6m"])}, "12m" = ${addDays(HORIZONS["12m"])}.
-  Prefer at least one short horizon (1w or 1m) per batch so feedback arrives quickly.
+- Allowed horizons and their deadlines:
+  "6m" = ${addDays(HORIZONS["6m"])}, "12m" = ${addDays(HORIZONS["12m"])}, "2y" = ${addDays(HORIZONS["2y"])}, "3y" = ${addDays(HORIZONS["3y"])}.
+  Choose the horizon the question naturally needs; most should be 12m or longer.
 
-- The question must name its deadline date explicitly.
+- Strategic topics only: geopolitical alignments, conflicts and agreements, technology adoption and competition, industrial and energy shifts, regulation, demographics, structural market trends.
 
-- Options: 2-4, mutually exclusive AND together covering every possible outcome. Use ranges/buckets where useful (e.g. "Up more than 5%", "Within 5% either way", "Down more than 5%").
+- NEVER ask about short-term price or index moves (e.g. "Will the S&P 500 be 2% higher?", "Will gold rise 5% this month?"). Markets may appear only as structural trends (e.g. "Will AI capex keep growing year over year through 2027?").
 
-- Genuinely uncertain: avoid near-certain outcomes (e.g. "Will China invade Taiwan this week?"). An informed person should rate the likeliest option somewhere around 35-75%.
+- Directional options: 2-4 options describing which way things go, e.g. "Accelerates" / "Plateaus" / "Reverses", or distinct strategic outcomes ("Formal agreement signed" / "Talks continue without agreement" / "Talks collapse"). Options must be mutually exclusive AND together cover every possible outcome. Keep each option short.
 
-- Price/market questions: you do not reliably know today's price. Express thresholds relative to the level on ${isoDay(new Date())} (e.g. "more than 5% above its ${isoDay(new Date())} close") unless the candidate metadata states the level.
+- The question must name its deadline date explicitly and be anchored in the selected story.
+
+- Genuinely uncertain: an informed person should rate the likeliest option somewhere around 35-70%.
+
+- base_rate: one short sentence with the outside view, i.e. how often comparable situations historically went each way (e.g. "Since 1990, about a third of comparable normalization talks produced a signed agreement within 3 years."). Say plainly if the base rate is rough.
 
 - criteria: an exact, objective resolution rule a neutral judge could apply with a web search on the deadline (which data source, which measure, what counts).
 
@@ -515,7 +520,7 @@ or technologies.
 
 forecast:
 null, or an object with
-question, options, horizon, criteria, ai_pick, ai_confidence, ai_reason (one sentence).
+question, options, horizon, criteria, ai_pick, ai_confidence, ai_reason (one sentence), base_rate (one sentence).
 
 Do not invent facts beyond candidate metadata.
 

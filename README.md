@@ -32,7 +32,7 @@ The backend searches Google News RSS across Reuters, Globes, Ynet, TechCrunch an
 Never place OPENAI_API_KEY in index.html or any browser-side JavaScript.
 
 ## Forecasts (Foresight tab)
-Each feed batch puts a forecast question on 2-3 cards, with a mix of 1 week, 1 month, 3 month, 6 month and 12 month deadlines. You pick an outcome and how sure you are, and the AI records its own forecast too.
+Each feed batch puts one strategic, directional forecast question on a card, with a 6 month, 1 year, 2 year or 3 year deadline (no short-term price moves). After locking in, the card shows the historical base rate. You pick an outcome and how sure you are, and the AI records its own forecast too.
 When a deadline passes, `/api/forecast` asks the AI (with web search) what actually happened and scores you and the AI (Brier score). You can correct a wrong verdict.
 The Foresight tab shows your hit rate, calibration, accuracy by topic and by time range, you vs the AI, and your daily time in the app.
 Forecasts are stored on the phone and backed up to Redis (`KV_REST_API_URL` / `KV_REST_API_TOKEN`) so they survive a cleared browser.
