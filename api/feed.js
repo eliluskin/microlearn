@@ -206,8 +206,10 @@ function byNewest(a, b) {
          (Date.parse(a.published) || 0);
 }
 
-// Strategic horizons only: short-term questions are mostly noise.
+// Short-term (1-3 months), mid-term (6-12 months), long-term (2-3 years).
 const HORIZONS = {
+  "1m": 30,
+  "3m": 91,
   "6m": 182,
   "12m": 365,
   "2y": 730,
@@ -459,8 +461,10 @@ A forecast is a strategic, directional question about where a structural trend o
 Rules for forecasts:
 
 - Allowed horizons and their deadlines:
-  "6m" = ${addDays(HORIZONS["6m"])}, "12m" = ${addDays(HORIZONS["12m"])}, "2y" = ${addDays(HORIZONS["2y"])}, "3y" = ${addDays(HORIZONS["3y"])}.
-  Choose the horizon the question naturally needs; most should be 12m or longer.
+  short-term: "1m" = ${addDays(HORIZONS["1m"])}, "3m" = ${addDays(HORIZONS["3m"])}
+  mid-term: "6m" = ${addDays(HORIZONS["6m"])}, "12m" = ${addDays(HORIZONS["12m"])}
+  long-term: "2y" = ${addDays(HORIZONS["2y"])}, "3y" = ${addDays(HORIZONS["3y"])}
+  Choose the horizon the question naturally needs. Prefer mid-term and long-term. Use short-term only when a strategic development genuinely comes to a head soon (a vote, a negotiation deadline, a launch, a ceasefire holding), never for price moves.
 
 - Strategic topics only: geopolitical alignments, conflicts and agreements, technology adoption and competition, industrial and energy shifts, regulation, demographics, structural market trends.
 

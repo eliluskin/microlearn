@@ -1249,7 +1249,7 @@ button,input{
 <div class="box">
 
   <h3>
-    Short vs long range
+    Short vs mid vs long term
   </h3>
 
   <div
@@ -3202,6 +3202,21 @@ const HORIZON_LABEL = {
   "3y":"3 years"
 };
 
+const TERM_OF = {
+  "1w":"Short-term",
+  "1m":"Short-term",
+  "3m":"Short-term",
+  "6m":"Mid-term",
+  "12m":"Mid-term",
+  "2y":"Long-term",
+  "3y":"Long-term"
+};
+
+const horizonText = h =>
+  [TERM_OF[h], HORIZON_LABEL[h] || h]
+    .filter(Boolean)
+    .join(" · ");
+
 // Unsaved option/confidence picks, keyed by item id.
 const fcDraft = {};
 
@@ -3288,7 +3303,7 @@ function forecastBlock(x) {
 
   const head = `
     <div class="it">
-      Forecast · ${esc(HORIZON_LABEL[q.horizon] || q.horizon)}
+      Forecast · ${esc(horizonText(q.horizon))}
     </div>
 
     <div class="prompt">
@@ -4016,11 +4031,14 @@ function renderForecast() {
   document.getElementById("fcTopics").innerHTML =
     hbarsHtml(groupRates(scored, f => f.topic || "Other"));
 
-  const hOrder =
-    Object.values(HORIZON_LABEL);
-
   document.getElementById("fcHorizons").innerHTML =
-    hbarsHtml(groupRates(scored, f => HORIZON_LABEL[f.horizon] || f.horizon, hOrder));
+    hbarsHtml(
+      groupRates(
+        scored,
+        f => TERM_OF[f.horizon] || "Other",
+        ["Short-term","Mid-term","Long-term","Other"]
+      )
+    );
 
   const done =
     S.forecasts
