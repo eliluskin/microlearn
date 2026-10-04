@@ -1,4 +1,5 @@
 import { redis } from "./_redis.js";
+import { guard, tooLarge } from "./_guard.js";
 
 const MAX_ITEMS = 100;
 
@@ -172,6 +173,10 @@ if (req.method === "GET") {
         error:"POST only"
       });
   }
+
+  if (tooLarge(res, req.body, 2_000_000)) return;
+
+  if (!(await guard(req, res, { bucket: "reservoir", perIpPerHour: 300, cost: 0 }))) return;
 
   try {
 

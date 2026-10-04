@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { guard, tooLarge } from "./_guard.js";
 
 const ai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const MODEL = process.env.OPENAI_MODEL || "gpt-5.6-luna";
@@ -278,6 +279,10 @@ export default async function handler(req, res) {
       error: "OPENAI_API_KEY missing"
     });
   }
+
+  if (tooLarge(res, req.body?.profile, 80000)) return;
+
+  if (!(await guard(req, res, { bucket: "feed", perIpPerHour: 40 }))) return;
 
   try {
 

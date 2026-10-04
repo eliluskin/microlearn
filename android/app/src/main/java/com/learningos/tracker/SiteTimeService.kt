@@ -11,7 +11,9 @@ import android.view.accessibility.AccessibilityEvent
 
 /**
  * Times visits to the tracked sites in Chrome by reading Chrome's address bar.
- * It never acts on the screen; it only keeps minutes per site.
+ * Android only delivers Chrome's events to this service (see
+ * accessibility_config.xml), and it never acts on the screen; it only keeps
+ * minutes per site.
  */
 class SiteTimeService : AccessibilityService() {
 
@@ -29,10 +31,18 @@ class SiteTimeService : AccessibilityService() {
 
     private val handler = Handler(Looper.getMainLooper())
 
+    // Only Chrome's events reach us, so leaving Chrome is noticed by polling.
     private val tick = object : Runnable {
         override fun run() {
-            checkpoint(System.currentTimeMillis())
-            handler.postDelayed(this, 60_000L)
+            val now = System.currentTimeMillis()
+
+            if (current != null && !chromeInFront()) {
+                switchTo(null, now)
+            } else {
+                checkpoint(now)
+            }
+
+            handler.postDelayed(this, 15_000L)
         }
     }
 
@@ -45,20 +55,24 @@ class SiteTimeService : AccessibilityService() {
     override fun onServiceConnected() {
         super.onServiceConnected()
         registerReceiver(screenOff, IntentFilter(Intent.ACTION_SCREEN_OFF))
-        handler.postDelayed(tick, 60_000L)
+        handler.postDelayed(tick, 15_000L)
         SyncWorker.schedule(this)
     }
 
+    private fun chromeInFront(): Boolean =
+        try {
+            rootInActiveWindow?.packageName?.toString() == chrome
+        } catch (e: Exception) {
+            false
+        }
+
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         event ?: return
+        if (event.packageName?.toString() != chrome) return
+
         val now = System.currentTimeMillis()
         val windowChange = event.eventType == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-
-        if (event.packageName?.toString() == chrome) {
-            lastActivity = now
-        } else if (!windowChange) {
-            return
-        }
+        lastActivity = now
 
         // Chrome fires many content events; looking at the address bar about
         // once a second is plenty.
@@ -99,7 +113,7 @@ class SiteTimeService : AccessibilityService() {
         since = now
     }
 
-    /** Saves the running visit every minute so a killed service loses little. */
+    /** Saves the running visit regularly so a killed service loses little. */
     private fun checkpoint(now: Long) {
         if (current == null) return
 

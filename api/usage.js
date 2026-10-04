@@ -1,4 +1,5 @@
 import { redis, hasRedis } from "./_redis.js";
+import { guard } from "./_guard.js";
 
 // Daily time on "junk" sites/apps, reported by the Android tracker.
 // Stored as a Redis hash: day -> {"ynet":sec,"walla":sec,"linkedin":sec}.
@@ -40,6 +41,8 @@ export default async function handler(req, res) {
   if (!hasRedis()) {
     return res.status(503).json({ error: "redis_not_configured" });
   }
+
+  if (!(await guard(req, res, { bucket: "usage", perIpPerHour: 300, cost: 0 }))) return;
 
   try {
     const key = usageKey(deviceId);

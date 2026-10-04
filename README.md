@@ -42,5 +42,9 @@ Forecasts are stored on the phone and backed up to Redis (`KV_REST_API_URL` / `K
 - LinkedIn app (and Ynet/Walla apps if installed): Android usage access.
 - Ynet/Walla/LinkedIn in Chrome: an accessibility service that reads only Chrome's address bar and keeps minutes per site.
 
-GitHub Actions builds the APK on every push that touches `android/` and publishes it under Releases (`tracker-vN`). On the phone: download `LearningOS-Tracker.apk`, install, then in LearningOS open Foresight → "Connect Android tracker".
-The signing key in `android/app/tracker.keystore` is a fixed key for this sideloaded app so updates install over each other; it is not meant for the Play Store.
+GitHub Actions builds the APK on every push that touches `android/`; only builds from `main` are published under Releases (`tracker-vN`). On the phone: download `LearningOS-Tracker.apk`, install, then in LearningOS open Foresight → "Connect Android tracker".
+
+## Security
+- The tracker's signing key is never committed. CI reads it from the `TRACKER_KEYSTORE_B64` and `TRACKER_KEYSTORE_PASSWORD` repository secrets and refuses to build without them. Keep an offline copy of the key: losing it means reinstalling the tracker.
+- The tracker's accessibility service only receives Chrome's events, only reads the address bar, and asks for confirmation before pairing with a server.
+- AI endpoints (`/api/feed`, `/api/deepen`, `/api/forecast`) reject requests from other websites, cap calls per IP per hour and cap total AI calls per day (`DAILY_AI_CALL_LIMIT`, default 400). Limits need Redis; the prepaid OpenAI balance with auto-reload off is the hard spending cap.

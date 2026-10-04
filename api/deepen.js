@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { guard, tooLarge } from "./_guard.js";
 
 const ai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
@@ -44,6 +45,10 @@ export default async function handler(req, res) {
         "OPENAI_API_KEY missing"
     });
   }
+
+  if (tooLarge(res, req.body, 30000)) return;
+
+  if (!(await guard(req, res, { bucket: "deepen", perIpPerHour: 40 }))) return;
 
   try {
 
