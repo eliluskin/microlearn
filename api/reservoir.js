@@ -1,10 +1,4 @@
-const REDIS_URL =
-  process.env.KV_REST_API_URL ||
-  process.env.UPSTASH_REDIS_REST_URL;
-
-const REDIS_TOKEN =
-  process.env.KV_REST_API_TOKEN ||
-  process.env.UPSTASH_REDIS_REST_TOKEN;
+import { redis } from "./_redis.js";
 
 const MAX_ITEMS = 100;
 
@@ -14,44 +8,6 @@ function reservoirKey(deviceId) {
 
 function profileKey(deviceId) {
   return `learningos:profile:${deviceId}`;
-}
-
-async function redis(...command) {
-  if (!REDIS_URL || !REDIS_TOKEN) {
-    throw new Error("Redis environment variables missing");
-  }
-
-  const r =
-    await fetch(
-      REDIS_URL,
-      {
-        method:"POST",
-
-        headers:{
-          Authorization:
-            `Bearer ${REDIS_TOKEN}`,
-
-          "Content-Type":
-            "application/json"
-        },
-
-        body:
-          JSON.stringify(command)
-      }
-    );
-
-  if (!r.ok) {
-    throw new Error(
-      `Redis HTTP ${r.status}: ${
-        await r.text()
-      }`
-    );
-  }
-
-  const d =
-    await r.json();
-
-  return d.result;
 }
 
 async function getItems(deviceId) {
