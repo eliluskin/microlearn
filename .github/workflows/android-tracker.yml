@@ -46,7 +46,10 @@ jobs:
             echo "::error::TRACKER_KEYSTORE_B64 is not valid. Paste the full contents of TRACKER_KEYSTORE_B64.txt again (one line, about 1,330 characters)."
             exit 1
           fi
-          if ! keytool -list -keystore "$RUNNER_TEMP/tracker.keystore" -storepass "$KEYSTORE_PASSWORD" -alias tracker > /dev/null 2>&1; then
+          # Non-secret fingerprint so a bad paste can be diagnosed from the log.
+          echo "Key file: $(wc -c < "$RUNNER_TEMP/tracker.keystore") bytes, sha256 $(sha256sum "$RUNNER_TEMP/tracker.keystore" | cut -c1-16), password length ${#KEYSTORE_PASSWORD}"
+          if ! keytool -list -keystore "$RUNNER_TEMP/tracker.keystore" -storepass "$KEYSTORE_PASSWORD" -alias tracker > "$RUNNER_TEMP/keytool.log" 2>&1; then
+            grep -i "error\|exception" "$RUNNER_TEMP/keytool.log" | head -3
             echo "::error::The key could not be opened. Check that TRACKER_KEYSTORE_PASSWORD matches TRACKER_KEYSTORE_PASSWORD.txt and that TRACKER_KEYSTORE_B64 was pasted completely."
             exit 1
           fi
