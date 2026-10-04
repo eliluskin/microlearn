@@ -560,7 +560,7 @@ button,input{
   width:min(780px,100%);
   display:grid;
   grid-template-columns:
-    repeat(4,1fr);
+    repeat(3,1fr);
   background:rgba(7,9,13,.9);
   backdrop-filter:blur(18px);
   border-top:
@@ -1124,31 +1124,6 @@ button,input{
 
 
 <section
-  id="saved"
-  class="view"
->
-
-<div class="header">
-
-  <div class="logo">
-    Saved <em>signal</em>
-  </div>
-
-  <div class="live">
-    LIBRARY
-  </div>
-
-</div>
-
-<div
-  id="savedFeed"
-  class="feed"
-></div>
-
-</section>
-
-
-<section
   id="model"
   class="view"
 >
@@ -1328,15 +1303,6 @@ button,input{
 >
   <span>⌂</span>
   Feed
-</button>
-
-<button
-  class="nav"
-  data-v="saved"
-  onclick="go('saved')"
->
-  <span>☆</span>
-  Saved
 </button>
 
 <button
@@ -1685,6 +1651,13 @@ if (
   S.forecasts = [];
 }
 
+// Stories fetched ahead of time so the next open or scroll is instant.
+if (
+  !Array.isArray(S.buffer)
+) {
+  S.buffer = [];
+}
+
 if (
   !S.usage ||
   typeof S.usage !== "object"
@@ -1790,6 +1763,12 @@ function profile() {
   const delivered =
     uniqItems([
       ...(S.seen || []),
+      ...S.buffer.map(
+        x => ({
+          id:x.id,
+          title:x.title
+        })
+      ),
       ...feed.map(
         x => ({
           id:x.id,
@@ -2001,13 +1980,6 @@ function card(x) {
       String(x.id)
     ];
 
-  const saved =
-    S.saved.some(
-      s =>
-        String(s.id) ===
-        String(x.id)
-    );
-
   // Real photos keep the image header; stories without one get a small
   // topic icon next to the source instead of a large placeholder.
   const visual =
@@ -2128,13 +2100,6 @@ function card(x) {
 
         <button
           class="act"
-          onclick="toggleSave('${eid}')"
-        >
-          ${saved ? "★" : "☆"}
-        </button>
-
-        <button
-          class="act"
           onclick="openAI('${eid}')"
         >
           Deep dive
@@ -2191,24 +2156,6 @@ function renderFeed() {
           No stories in this filter yet.
         </div>`; 
   setTimeout(trackVisibleCards, 0);
-}
-
-
-function renderSaved() {
-
-  document.getElementById(
-    "savedFeed"
-  ).innerHTML =
-
-    S.saved.length
-
-      ? S.saved
-          .map(card)
-          .join("")
-
-      : `<div class="empty">
-          Save stories you want to keep.
-        </div>`;
 }
 
 
@@ -2426,6 +2373,100 @@ async function requestBatch() {
 }
 
 
+// ---------- Freshness ----------
+
+const BUFFER_MAX_AGE = 6 * 36e5;
+const REFRESH_ON_RETURN = 5 * 60e3;
+const REFRESH_WHILE_OPEN = 10 * 60e3;
+
+let lastRefresh = 0;
+let prefetchPromise = null;
+
+/** Returns buffered stories that are still fresh and new, and empties the buffer. */
+function takeBuffer() {
+
+  const fresh =
+    mergeUnique(
+      S.buffer.filter(
+        x =>
+          Date.now() - (x.fetchedAt || 0) < BUFFER_MAX_AGE
+      )
+    );
+
+  S.buffer = [];
+  save();
+
+  return fresh;
+}
+
+/** Fetches the next batch in the background so it is ready instantly. */
+function prefetch() {
+
+  if (
+    prefetchPromise ||
+    loading ||
+    document.visibilityState !== "visible" ||
+    S.buffer.length >= 8
+  ) {
+    return;
+  }
+
+  prefetchPromise =
+    requestBatch()
+      .then(d => {
+
+        const known =
+          new Set(
+            S.buffer.map(x => String(x.id))
+          );
+
+        const items =
+          mergeUnique(d.items)
+            .filter(x => !known.has(String(x.id)))
+            .map(x => ({ ...x, fetchedAt:Date.now() }));
+
+        S.buffer =
+          [...S.buffer, ...items].slice(-30);
+
+        save();
+      })
+      .catch(e =>
+        console.warn("Prefetch failed", e)
+      )
+      .finally(() => {
+        prefetchPromise = null;
+      });
+}
+
+/** Refreshes when the app comes back to the screen and periodically while open. */
+function startFreshness() {
+
+  document.addEventListener(
+    "visibilitychange",
+    () => {
+      if (
+        document.visibilityState === "visible" &&
+        Date.now() - lastRefresh > REFRESH_ON_RETURN
+      ) {
+        initialLoad();
+      }
+    }
+  );
+
+  setInterval(
+    () => {
+      if (
+        document.visibilityState === "visible" &&
+        Date.now() - lastRefresh > REFRESH_WHILE_OPEN
+      ) {
+        initialLoad();
+      }
+    },
+    60e3
+  );
+}
+
+
 async function initialLoad() {
 
   if (loading) {
@@ -2453,10 +2494,7 @@ async function initialLoad() {
   }
 
   setStatus(
-    feed.length
-      ? "CACHED"
-      : "LOADING",
-    false
+    "LOADING"
   );
 
   document.getElementById(
@@ -2465,7 +2503,7 @@ async function initialLoad() {
 
     feed.length
 
-      ? "checking quietly for updates"
+      ? "checking for new stories"
 
       : "building a fresh batch";
 
@@ -2480,7 +2518,15 @@ let fresh = [];
 
 let fromReservoir = false;
 
-try {
+// A batch prepared in the background shows instantly.
+if (prefetchPromise) {
+  await prefetchPromise;
+}
+
+fresh =
+  takeBuffer();
+
+if (!fresh.length) try {
 
   fresh =
     mergeUnique(
@@ -2525,15 +2571,25 @@ if (!fresh.length) {
         );
       }
 
+      const hadFeed =
+        feed.length > 0;
+
       feed =
         uniqItems([
           ...fresh,
           ...feed
         ]);
 
-    
-
       cache();
+
+      if (
+        hadFeed &&
+        window.scrollY > 400
+      ) {
+        toast(
+          `${fresh.length} new stories on top`
+        );
+      }
 
       renderFeed();
 
@@ -2579,7 +2635,6 @@ if (!fresh.length) {
   } catch (e) {
 
   console.error(e);
-  alert("Feed error: " + (e?.message || String(e)));
 
   setStatus(
       feed.length
@@ -2623,6 +2678,14 @@ if (!fresh.length) {
   } finally {
 
     loading = false;
+
+    lastRefresh =
+      Date.now();
+
+    setTimeout(
+      prefetch,
+      1500
+    );
   }
 }
   async function loadMore() {
@@ -2658,13 +2721,19 @@ if (!fresh.length) {
 
   try {
 
-    const d =
-      await requestBatch();
+    if (prefetchPromise) {
+      await prefetchPromise;
+    }
 
-    const more =
-      mergeUnique(
-        d.items
-      );
+    let more =
+      takeBuffer();
+
+    if (!more.length) {
+      more =
+        mergeUnique(
+          (await requestBatch()).items
+        );
+    }
 
     if (
       more.length
@@ -2732,6 +2801,11 @@ if (!fresh.length) {
   finally {
 
     loading = false;
+
+    setTimeout(
+      prefetch,
+      1500
+    );
   }
 }
 
@@ -2858,69 +2932,12 @@ function adjustMap(
 
   renderFeed();
 
-  renderSaved();
 
   toast(
     val > 0
       ? "More like this"
       : "Less like this"
   );
-}
-
-
-function toggleSave(
-  encoded
-) {
-
-  const x =
-    findItem(encoded);
-
-  if (!x) {
-    return;
-  }
-
-  const i =
-    S.saved.findIndex(
-      s =>
-        String(s.id) ===
-        String(x.id)
-    );
-
-  if (
-    i >= 0
-  ) {
-
-    S.saved.splice(
-      i,
-      1
-    );
-
-    toast(
-      "Removed from saved"
-    );
-
-  } else {
-
-    S.saved.unshift(
-      x
-    );
-
-    S.saved =
-      S.saved.slice(
-        0,
-        100
-      );
-
-    toast(
-      "Saved"
-    );
-  }
-
-  save();
-
-  renderFeed();
-
-  renderSaved();
 }
 
 
@@ -2988,7 +3005,6 @@ function go(v) {
   if (
     v === "saved"
   ) {
-    renderSaved();
   }
 
   if (
@@ -3412,7 +3428,6 @@ function fcResultHtml(f) {
 function rerenderCards() {
 
   renderFeed();
-  renderSaved();
 
   if (
     document.getElementById("forecast").classList.contains("on")
@@ -4118,7 +4133,6 @@ async function boot() {
 
   filters();
 
-  renderSaved();
 
   renderModel();
 
@@ -4147,6 +4161,8 @@ async function boot() {
   bootObserver();
 
   startUsageTracking();
+
+  startFreshness();
 
   navBadge();
 
