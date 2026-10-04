@@ -16,9 +16,9 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import com.learningos.tracker.Store.deviceId
-import com.learningos.tracker.Store.lastSync
-import com.learningos.tracker.Store.server
+import com.learningos.tracker.Store.pairedDevice
+import com.learningos.tracker.Store.lastSyncText
+import com.learningos.tracker.Store.pairedServer
 import kotlin.concurrent.thread
 
 class MainActivity : Activity() {
@@ -69,8 +69,8 @@ class MainActivity : Activity() {
         val d = data.getQueryParameter("device").orEmpty()
 
         if (s.startsWith("https://") && d.isNotBlank()) {
-            server = s.trimEnd('/')
-            deviceId = d
+            pairedServer = s.trimEnd('/')
+            pairedDevice = d
             syncStatus = "Connected to LearningOS"
         }
     }
@@ -98,21 +98,21 @@ class MainActivity : Activity() {
         )
 
         section("1. Connect to LearningOS")
-        if (server.isNotEmpty() && deviceId.isNotEmpty()) {
-            text("✓ Connected to $server", 14f, lime)
+        if (pairedServer.isNotEmpty() && pairedDevice.isNotEmpty()) {
+            text("✓ Connected to $pairedServer", 14f, lime)
         } else {
             text(
                 "Open LearningOS on this phone → Foresight tab → \"Connect Android tracker\". " +
                     "Or type the address and code shown there:",
                 14f, muted
             )
-            val s = input("https://your-app.vercel.app", server)
-            val d = input("Device code", deviceId)
+            val s = input("https://your-app.vercel.app", pairedServer)
+            val d = input("Device code", pairedDevice)
             button("Save") {
                 val sv = s.text.toString().trim().trimEnd('/')
                 if (sv.startsWith("https://") && d.text.isNotBlank()) {
-                    server = sv
-                    deviceId = d.text.toString().trim()
+                    pairedServer = sv
+                    pairedDevice = d.text.toString().trim()
                     render()
                     syncNow()
                 }
@@ -165,7 +165,7 @@ class MainActivity : Activity() {
         }
 
         section("Sync")
-        text(syncStatus.ifEmpty { lastSync.ifEmpty { "Not synced yet" } }, 14f, muted)
+        text(syncStatus.ifEmpty { lastSyncText.ifEmpty { "Not synced yet" } }, 14f, muted)
         button("Sync now") { syncNow() }
     }
 

@@ -8,9 +8,9 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.learningos.tracker.Store.deviceId
-import com.learningos.tracker.Store.lastSync
-import com.learningos.tracker.Store.server
+import com.learningos.tracker.Store.pairedDevice
+import com.learningos.tracker.Store.lastSyncText
+import com.learningos.tracker.Store.pairedServer
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
@@ -54,8 +54,8 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
         /** Runs off the main thread. Returns a status line for the screen. */
         fun sync(ctx: Context): String {
-            val server = ctx.server.trimEnd('/')
-            val device = ctx.deviceId
+            val server = ctx.pairedServer.trimEnd('/')
+            val device = ctx.pairedDevice
 
             if (server.isEmpty() || device.isEmpty()) {
                 return "Not connected to LearningOS yet"
@@ -91,8 +91,8 @@ class SyncWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
                 if (code in 200..299) {
                     val stamp = DateFormat.getTimeInstance(DateFormat.SHORT).format(Date())
-                    ctx.lastSync = "Synced at $stamp"
-                    ctx.lastSync
+                    ctx.lastSyncText = "Synced at $stamp"
+                    ctx.lastSyncText
                 } else {
                     "Sync failed: server answered $code"
                 }

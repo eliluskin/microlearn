@@ -78,15 +78,15 @@ object Store {
     fun webMs(ctx: Context, day: String, site: String): Long =
         prefs(ctx).getLong("web|$day|$site", 0L)
 
-    var Context.server: String
+    var Context.pairedServer: String
         get() = prefs(this).getString("server", "") ?: ""
         set(v) = prefs(this).edit().putString("server", v).apply()
 
-    var Context.deviceId: String
+    var Context.pairedDevice: String
         get() = prefs(this).getString("deviceId", "") ?: ""
         set(v) = prefs(this).edit().putString("deviceId", v).apply()
 
-    var Context.lastSync: String
+    var Context.lastSyncText: String
         get() = prefs(this).getString("lastSync", "") ?: ""
         set(v) = prefs(this).edit().putString("lastSync", v).apply()
 }
