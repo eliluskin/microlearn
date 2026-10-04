@@ -1082,6 +1082,15 @@ function getDeviceId() {
     ? d.items
     : [];
   }
+async function consumeReservoir(ids) {
+  return reservoirRequest(
+    "consume",
+    {
+      ids:
+        (ids || []).map(String)
+    }
+  );
+}
 async function reservoirRequest(
   action,
   extra = {}
@@ -1328,11 +1337,19 @@ const uniqItems = xs => {
 
 function profile() {
 
-const delivered =
-  uniqItems(
-    S.seen || []
-  )
-  .slice(-250);
+  // Exclude both viewed stories and everything already in the feed,
+  // otherwise /api/feed keeps returning items we already have.
+  const delivered =
+    uniqItems([
+      ...(S.seen || []),
+      ...feed.map(
+        x => ({
+          id:x.id,
+          title:x.title
+        })
+      )
+    ])
+    .slice(-250);
 
   return {
 
@@ -2061,7 +2078,9 @@ let fromReservoir = false;
 try {
 
   fresh =
-    await getReservoir();
+    mergeUnique(
+      await getReservoir()
+    );
 
   fromReservoir =
     fresh.length > 0;
@@ -2084,32 +2103,22 @@ if (!fresh.length) {
       d.items
     );
 
-  if (fresh.length) {
-
-    try {
-
-      const stored =
-        await putReservoir(
-          fresh
-        );
-
-      if (stored.length) {
-        fresh = stored;
-      }
-
-    } catch (e) {
-
-      console.warn(
-        "Reservoir seed failed",
-        e
-      );
-    }
-  }
 }
 
     if (
       fresh.length
     ) {
+
+      if (fromReservoir) {
+        consumeReservoir(
+          fresh.map(x => x.id)
+        ).catch(e =>
+          console.warn(
+            "Reservoir consume failed",
+            e
+          )
+        );
+      }
 
       feed =
         uniqItems([
