@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { redis, hasRedis } from "./_redis.js";
+import { guard, tooLarge } from "./_guard.js";
 
 const ai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const MODEL = process.env.OPENAI_MODEL || "gpt-5.6-luna";
@@ -179,6 +180,12 @@ export default async function handler(req, res) {
         )
         .slice(0, MAX_RESOLVE);
 
+      if (!due.length) {
+        return res.status(200).json({ results: [] });
+      }
+
+      if (!(await guard(req, res, { bucket: "forecast", perIpPerHour: 12, cost: due.length }))) return;
+
       const results = await Promise.all(due.map(resolveOne));
 
       return res.status(200).json({ results });
@@ -194,7 +201,11 @@ export default async function handler(req, res) {
       return res.status(503).json({ error: "redis_not_configured" });
     }
 
+    if (!(await guard(req, res, { bucket: "forecast-store", perIpPerHour: 300, cost: 0 }))) return;
+
     if (action === "sync") {
+      if (tooLarge(res, body.items, 2_000_000)) return;
+
       const items = (Array.isArray(body.items) ? body.items : []).slice(-MAX_STORED);
 
       await redis("SET", forecastsKey(deviceId), JSON.stringify(items));

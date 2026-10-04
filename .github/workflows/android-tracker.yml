@@ -7,8 +7,9 @@ on:
       - ".github/workflows/android-tracker.yml"
   workflow_dispatch:
 
+# Read-only by default; only the release job may write.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -29,25 +30,65 @@ jobs:
         with:
           gradle-version: "8.11.1"
 
+      # The private signing key lives only in GitHub secrets, never in the repo.
+      - name: Load signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.TRACKER_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.TRACKER_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::Add the TRACKER_KEYSTORE_B64 and TRACKER_KEYSTORE_PASSWORD repository secrets (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          # Values pasted on a phone often pick up spaces or line breaks.
+          KEYSTORE_PASSWORD="$(printf '%s' "$KEYSTORE_PASSWORD" | tr -d ' \r\n\t')"
+          if ! printf '%s' "$KEYSTORE_B64" | tr -d ' \r\n\t' | base64 -d > "$RUNNER_TEMP/tracker.keystore" 2>/dev/null; then
+            echo "::error::TRACKER_KEYSTORE_B64 is not valid. Paste the full contents of TRACKER_KEYSTORE_B64.txt again (one line, about 1,330 characters)."
+            exit 1
+          fi
+          # Non-secret fingerprint so a bad paste can be diagnosed from the log.
+          echo "Key file: $(wc -c < "$RUNNER_TEMP/tracker.keystore") bytes, sha256 $(sha256sum "$RUNNER_TEMP/tracker.keystore" | cut -c1-16), password length ${#KEYSTORE_PASSWORD}"
+          if ! keytool -list -keystore "$RUNNER_TEMP/tracker.keystore" -storepass "$KEYSTORE_PASSWORD" -alias tracker > "$RUNNER_TEMP/keytool.log" 2>&1; then
+            grep -i "error\|exception" "$RUNNER_TEMP/keytool.log" | head -3
+            echo "::error::The key could not be opened. Check that TRACKER_KEYSTORE_PASSWORD matches TRACKER_KEYSTORE_PASSWORD.txt and that TRACKER_KEYSTORE_B64 was pasted completely."
+            exit 1
+          fi
+          echo "TRACKER_KEYSTORE_PATH=$RUNNER_TEMP/tracker.keystore" >> "$GITHUB_ENV"
+          echo "TRACKER_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+
       - name: Build APK
         run: gradle --no-daemon assembleRelease
 
       - name: Rename APK
-        run: cp app/build/outputs/apk/release/app-release.apk LearningOS-Tracker.apk
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk LearningOS-Tracker.apk
+          rm -f "$RUNNER_TEMP/tracker.keystore"
 
       - uses: actions/upload-artifact@v4
         with:
           name: LearningOS-Tracker
           path: android/LearningOS-Tracker.apk
 
-      # A release page gives a phone-friendly download link.
+  # Only reviewed code on main becomes a downloadable release.
+  release:
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: LearningOS-Tracker
+
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: tracker-v${{ github.run_number }}
           name: LearningOS Tracker ${{ github.run_number }}
           target_commitish: ${{ github.sha }}
           make_latest: true
-          files: android/LearningOS-Tracker.apk
+          files: LearningOS-Tracker.apk
           body: |
             Android tracker for LearningOS. On your phone, download LearningOS-Tracker.apk below and open it to install.
-            Built from ${{ github.ref_name }} @ ${{ github.sha }}.
+            Built from main @ ${{ github.sha }}.

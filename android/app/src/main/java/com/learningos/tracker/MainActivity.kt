@@ -1,6 +1,7 @@
 package com.learningos.tracker
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
@@ -68,11 +69,28 @@ class MainActivity : Activity() {
         val s = data.getQueryParameter("server").orEmpty()
         val d = data.getQueryParameter("device").orEmpty()
 
-        if (s.startsWith("https://") && d.isNotBlank()) {
-            pairedServer = s.trimEnd('/')
-            pairedDevice = d
-            syncStatus = "Connected to LearningOS"
-        }
+        if (!s.startsWith("https://") || d.isBlank()) return
+
+        val server = s.trimEnd('/')
+        if (server == pairedServer && d == pairedDevice) return
+
+        // A pairing link decides where usage data is sent, so a link from
+        // anywhere else must never switch it silently.
+        AlertDialog.Builder(this)
+            .setTitle("Connect to this server?")
+            .setMessage(
+                "Your daily minutes will be sent to:\n\n$server\n\n" +
+                    "Only continue if this is your own LearningOS address."
+            )
+            .setPositiveButton("Connect") { _, _ ->
+                pairedServer = server
+                pairedDevice = d
+                syncStatus = "Connected to LearningOS"
+                render()
+                syncNow()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun usageOk() = AppUsage.hasPermission(this)
@@ -135,23 +153,25 @@ class MainActivity : Activity() {
         } else {
             text(
                 "Android blocks this for apps installed outside the Play Store until you allow it. " +
-                    "First tap \"App info\", then ⋮ (top right) → \"Allow restricted settings\". " +
-                    "Then tap \"Accessibility settings\" → Installed apps → LearningOS site timer → On.",
+                    "1) Tap \"Accessibility settings\" → Installed apps → LearningOS site timer and try to turn it on " +
+                    "(it will be blocked). 2) Tap \"App info\" → ⋮ (top right) → \"Allow restricted settings\". " +
+                    "3) Back in Accessibility settings, turn it on. " +
+                    "On Samsung, if ⋮ has no such option, turn off Settings → Security and privacy → Auto Blocker first.",
                 14f, muted
             )
+            button("Accessibility settings") {
+                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+            }
             button("App info") {
                 startActivity(
                     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         .setData(Uri.parse("package:$packageName"))
                 )
             }
-            button("Accessibility settings") {
-                startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-            }
         }
         text(
-            "Privacy: it only reads Chrome's address bar, keeps nothing but minutes per site, " +
-                "and sends only those totals to your own LearningOS server.",
+            "Privacy: Android only lets it see Chrome, it only reads the address bar, keeps nothing but " +
+                "minutes per site, and sends only those totals to your own LearningOS server.",
             12f, muted
         )
 
