@@ -40,7 +40,16 @@ jobs:
             echo "::error::Add the TRACKER_KEYSTORE_B64 and TRACKER_KEYSTORE_PASSWORD repository secrets (Settings > Secrets and variables > Actions)."
             exit 1
           fi
-          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/tracker.keystore"
+          # Values pasted on a phone often pick up spaces or line breaks.
+          KEYSTORE_PASSWORD="$(printf '%s' "$KEYSTORE_PASSWORD" | tr -d ' \r\n\t')"
+          if ! printf '%s' "$KEYSTORE_B64" | tr -d ' \r\n\t' | base64 -d > "$RUNNER_TEMP/tracker.keystore" 2>/dev/null; then
+            echo "::error::TRACKER_KEYSTORE_B64 is not valid. Paste the full contents of TRACKER_KEYSTORE_B64.txt again (about 4,560 characters)."
+            exit 1
+          fi
+          if ! keytool -list -keystore "$RUNNER_TEMP/tracker.keystore" -storepass "$KEYSTORE_PASSWORD" -alias tracker > /dev/null 2>&1; then
+            echo "::error::The key could not be opened. Check that TRACKER_KEYSTORE_PASSWORD matches TRACKER_KEYSTORE_PASSWORD.txt and that TRACKER_KEYSTORE_B64 was pasted completely."
+            exit 1
+          fi
           echo "TRACKER_KEYSTORE_PATH=$RUNNER_TEMP/tracker.keystore" >> "$GITHUB_ENV"
           echo "TRACKER_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
 
