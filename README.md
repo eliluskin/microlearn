@@ -36,3 +36,11 @@ Each feed batch puts a forecast question on 2-3 cards, with a mix of 1 week, 1 m
 When a deadline passes, `/api/forecast` asks the AI (with web search) what actually happened and scores you and the AI (Brier score). You can correct a wrong verdict.
 The Foresight tab shows your hit rate, calibration, accuracy by topic and by time range, you vs the AI, and your daily time in the app.
 Forecasts are stored on the phone and backed up to Redis (`KV_REST_API_URL` / `KV_REST_API_TOKEN`) so they survive a cleared browser.
+
+## Android tracker (junk-time measurement)
+`android/` is a small companion app that measures daily minutes on Ynet, Walla and LinkedIn and sends them to `/api/usage`. It never blocks anything.
+- LinkedIn app (and Ynet/Walla apps if installed): Android usage access.
+- Ynet/Walla/LinkedIn in Chrome: an accessibility service that reads only Chrome's address bar and keeps minutes per site.
+
+GitHub Actions builds the APK on every push that touches `android/` and publishes it under Releases (`tracker-vN`). On the phone: download `LearningOS-Tracker.apk`, install, then in LearningOS open Foresight → "Connect Android tracker".
+The signing key in `android/app/tracker.keystore` is a fixed key for this sideloaded app so updates install over each other; it is not meant for the Play Store.

@@ -934,6 +934,24 @@ button,input{
   margin:5px 5px 0 0
 }
 
+.legend{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:11px;
+  color:#AEB7C4;
+  margin:6px 0 4px
+}
+
+.legend i{
+  display:inline-block;
+  width:10px;
+  height:10px;
+  border-radius:3px;
+  margin-right:6px;
+  vertical-align:-1px
+}
+
 .navBadge{
   display:inline-block;
   min-width:16px;
@@ -1204,7 +1222,7 @@ button,input{
 <div class="box">
 
   <h3>
-    Time in LearningOS
+    Focus vs junk scrolling
   </h3>
 
   <div id="usage"></div>
@@ -3648,46 +3666,155 @@ function calibrationSvg(list) {
     <div class="note">Vertical: how often you were right. Number = forecasts in that group.</div>`;
 }
 
-function usageSvg() {
+let junkUsage =
+  null;
+
+const JUNK_SITES = {
+  ynet:"Ynet",
+  walla:"Walla",
+  linkedin:"LinkedIn"
+};
+
+const junkMin = day =>
+  Object.keys(JUNK_SITES).reduce(
+    (s,k) => s + (junkUsage?.days?.[day]?.[k] || 0),
+    0
+  ) / 60;
+
+async function loadJunkUsage() {
+
+  try {
+
+    const r =
+      await fetch(
+        "/api/usage",
+        {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body:JSON.stringify({
+            deviceId:DEVICE_ID,
+            action:"get"
+          })
+        }
+      );
+
+    if (!r.ok) {
+      throw new Error(`Usage HTTP ${r.status}`);
+    }
+
+    junkUsage =
+      await r.json();
+
+  } catch (e) {
+    console.warn("Usage load failed", e);
+  }
+
+  if (
+    document.getElementById("forecast").classList.contains("on")
+  ) {
+    document.getElementById("usage").innerHTML =
+      usageHtml();
+  }
+}
+
+function pct(now, before) {
+
+  if (!before) return "";
+
+  const d =
+    Math.round((now - before) / before * 100);
+
+  return `${d > 0 ? "+" : ""}${d}% vs previous week`;
+}
+
+function usageHtml() {
+
+  const tracked =
+    !!junkUsage?.lastSync;
 
   const days = [];
 
   for (let i = 13; i >= 0; i--) {
     const d = new Date(Date.now() - i * 864e5);
     const k = localDay(d);
-    days.push({ k, label:d.getDate(), min:(S.usage[k] || 0) / 60 });
+    days.push({
+      k,
+      label:d.getDate(),
+      app:(S.usage[k] || 0) / 60,
+      junk:junkMin(k)
+    });
   }
 
-  const max =
-    Math.max(10, ...days.map(d => d.min));
+  const sum = (xs, key) =>
+    xs.reduce((s,d) => s + d[key], 0);
 
-  const W = 300, H = 120, B = 18, T = 14, bw = 300 / 14;
+  const appWeek = sum(days.slice(7), "app");
+  const appPrev = sum(days.slice(0,7), "app");
+  const junkWeek = sum(days.slice(7), "junk");
+  const junkPrev = sum(days.slice(0,7), "junk");
+
+  const max =
+    Math.max(10, ...days.map(d => Math.max(d.app, d.junk)));
+
+  const W = 300, H = 130, B = 18, T = 8, slot = 300 / 14, bw = (slot - 6) / 2;
+
+  const bar = (x, v, color, label) => {
+    const h = v / max * (H - B - T);
+    return `<rect x="${x}" y="${H - B - h}" width="${bw}" height="${Math.max(h, v ? 2 : 0)}" rx="2" fill="${color}"><title>${label}: ${Math.round(v)} min</title></rect>`;
+  };
 
   const bars = days.map((d,i) => {
-    const h = d.min / max * (H - B - T);
+    const x = i * slot + 3;
     return `
       <g>
-        <title>${d.k}: ${Math.round(d.min)} min</title>
-        <rect x="${i * bw + 3}" y="${H - B - h}" width="${bw - 6}" height="${Math.max(h, d.min ? 2 : 0)}" rx="3" fill="var(--lime)"/>
-        <text x="${i * bw + bw / 2}" y="${H - 4}" text-anchor="middle">${d.label}</text>
+        ${bar(x, d.app, "#2F95C8", `${d.k} LearningOS`)}
+        ${tracked ? bar(x + bw + 1, d.junk, "#D0683A", `${d.k} Ynet, Walla, LinkedIn`) : ""}
+        <text x="${i * slot + slot / 2}" y="${H - 4}" text-anchor="middle">${d.label}</text>
       </g>`;
   }).join("");
 
-  const todayMin =
-    Math.round(days[13].min);
+  const todayJunk =
+    Object.entries(JUNK_SITES)
+      .map(([k,name]) => `${name} ${Math.round((junkUsage?.days?.[days[13].k]?.[k] || 0) / 60)}`)
+      .join(" · ");
 
-  const week =
-    days.slice(7).reduce((s,d) => s + d.min, 0);
+  const pairUrl =
+    `learningos-tracker://pair?server=${encodeURIComponent(location.origin)}&device=${encodeURIComponent(DEVICE_ID)}`;
 
   return `
     <div class="tiles" style="margin:0 0 8px">
-      <div class="tile"><small>Today</small><b>${todayMin} min</b></div>
-      <div class="tile"><small>Last 7 days</small><b>${Math.round(week)} min</b><span>${Math.round(week / 7)} min a day</span></div>
+      <div class="tile">
+        <small>LearningOS · 7 days</small>
+        <b>${Math.round(appWeek)} min</b>
+        <span>${esc(pct(appWeek, appPrev) || `${Math.round(days[13].app)} min today`)}</span>
+      </div>
+      <div class="tile">
+        <small>Junk · 7 days</small>
+        <b>${tracked ? Math.round(junkWeek) + " min" : "–"}</b>
+        <span>${tracked ? esc(pct(junkWeek, junkPrev) || `${Math.round(days[13].junk)} min today`) : "connect the tracker"}</span>
+      </div>
     </div>
-    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Minutes in LearningOS per day, last 14 days">
+
+    <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Minutes per day, last 14 days: LearningOS vs Ynet, Walla and LinkedIn">
       ${bars}
     </svg>
-    <div class="note">Counts only time the app is open and you are active.</div>`;
+
+    <div class="legend">
+      <span><i style="background:#2F95C8"></i>LearningOS</span>
+      ${tracked ? `<span><i style="background:#D0683A"></i>Ynet, Walla, LinkedIn</span>` : ""}
+    </div>
+
+    ${tracked
+      ? `<div class="note">Today: ${esc(todayJunk)} min. Tracker last synced ${esc(new Date(junkUsage.lastSync).toLocaleString())}.</div>`
+      : `<div class="note">
+           To measure Ynet, Walla and LinkedIn, install the LearningOS Tracker app on this phone, then tap:
+         </div>
+         <a class="retry" style="display:block;text-align:center;text-decoration:none" href="${esc(pairUrl)}">
+           Connect Android tracker
+         </a>
+         <div class="note" style="margin-top:8px">
+           Or enter manually in the tracker: address <b>${esc(location.origin)}</b>, code <b>${esc(DEVICE_ID)}</b>
+         </div>`}`;
 }
 
 function renderForecast() {
@@ -3804,7 +3931,9 @@ function renderForecast() {
       : `<div class="note">Nothing pending. Look for the purple Forecast box on feed cards.</div>`;
 
   document.getElementById("usage").innerHTML =
-    usageSvg();
+    usageHtml();
+
+  loadJunkUsage();
 
   resolveDue();
 }

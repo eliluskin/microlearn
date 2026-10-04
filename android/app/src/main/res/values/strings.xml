@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LearningOS Tracker</string>
+    <string name="service_label">LearningOS site timer</string>
+    <string name="service_description">Measures how long you spend on ynet.co.il, walla.co.il and linkedin.com in Chrome. It only reads Chrome\'s address bar, keeps only minutes per site, and never blocks or changes anything.</string>
+</resources>
