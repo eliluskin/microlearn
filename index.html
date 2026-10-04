@@ -3808,13 +3808,15 @@ function usageHtml() {
       ? `<div class="note">Today: ${esc(todayJunk)} min. Tracker last synced ${esc(new Date(junkUsage.lastSync).toLocaleString())}.</div>`
       : `<div class="note">
            To measure Ynet, Walla and LinkedIn, install the LearningOS Tracker app on this phone, then tap:
-         </div>
-         <a class="retry" style="display:block;text-align:center;text-decoration:none" href="${esc(pairUrl)}">
-           Connect Android tracker
-         </a>
-         <div class="note" style="margin-top:8px">
-           Or enter manually in the tracker: address <b>${esc(location.origin)}</b>, code <b>${esc(DEVICE_ID)}</b>
-         </div>`}`;
+         </div>`}
+
+    <a class="retry" style="display:block;text-align:center;text-decoration:none" href="${esc(pairUrl)}">
+      ${tracked ? "Reconnect Android tracker" : "Connect Android tracker"}
+    </a>
+
+    <div class="note" style="margin-top:8px">
+      Or enter manually in the tracker: address <b>${esc(location.origin)}</b>, code <b>${esc(DEVICE_ID)}</b>
+    </div>`;
 }
 
 function renderForecast() {
